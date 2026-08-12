@@ -150,6 +150,23 @@ export const scroll = {
   ease: { desktop: 0.12, mobile: 0.16 },
 }
 
+/**
+ * The score that plays under the film, and only under the film — it fades out
+ * as the invitation takes over.
+ *
+ * `volume` is the ceiling it fades up to, 0..1. Kept well below 1: this starts
+ * on a phone in someone's hand, possibly in company.
+ *
+ * Set `enabled: false` to ship the film silent.
+ */
+export const sound = {
+  enabled: true,
+  src: '/Audio/film.mp3',
+  volume: 0.45,
+  fadeIn: 2.4,
+  fadeOut: 1.4,
+}
+
 /** Loading strategy. */
 export const loading = {
   /** Load every Nth frame first so the film can start before everything lands. */

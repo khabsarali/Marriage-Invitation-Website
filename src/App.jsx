@@ -16,11 +16,30 @@ import Rsvp from './components/site/Rsvp.jsx'
 import Footer from './components/site/Footer.jsx'
 
 import { FrameSequence } from './lib/FrameSequence.js'
+import { FilmAudio } from './lib/FilmAudio.js'
 import { loadManifest } from './lib/manifest.js'
 import { useDeviceProfile, usePrefersReducedMotion } from './lib/hooks.js'
-import { loading } from './config/scenes.config.js'
+import { loading, sound } from './config/scenes.config.js'
 
 gsap.registerPlugin(ScrollTrigger)
+
+const MUTE_KEY = 'invitation:muted'
+
+/** Private-mode Safari throws on localStorage, and a mute toggle is not worth a crash. */
+const readMuted = () => {
+  try {
+    return window.localStorage.getItem(MUTE_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+const writeMuted = (muted) => {
+  try {
+    window.localStorage.setItem(MUTE_KEY, muted ? '1' : '0')
+  } catch {
+    /* not worth reporting */
+  }
+}
 
 /**
  * Keeps a stable viewport height for the pinned stage. Mobile browsers change
@@ -60,7 +79,13 @@ export default function App() {
   const [phase, setPhase] = useState('loading') // loading | leaving | ready | filmless
   const [filmDone, setFilmDone] = useState(false)
   const [filmActive, setFilmActive] = useState(true)
+  const [muted, setMuted] = useState(readMuted)
+  // Whether the score has actually been unlocked by a gesture and decoded, as
+  // opposed to merely being wanted — the toggle must not claim to be playing
+  // something the browser has not let us start yet.
+  const [audioReady, setAudioReady] = useState(false)
   const sequenceRef = useRef(null)
+  const audioRef = useRef(null)
 
   /* ------------------------------------------------------------- load film */
 
@@ -110,9 +135,54 @@ export default function App() {
     }
   }, [isMobile])
 
-  /* ------------------------------------------------- scroll lock + smoothing */
+  /* ------------------------------------------------------------- the score */
 
   const showFilm = phase === 'ready' || phase === 'leaving'
+
+  useEffect(() => {
+    if (!sound.enabled || !FilmAudio.supported) return
+
+    const audio = new FilmAudio(sound)
+    audioRef.current = audio
+
+    // Browsers only grant audio on a real gesture, and scrolling is not one —
+    // so we wait for the first tap, click or key rather than trying to start
+    // the score with the film and being silently refused.
+    let cancelled = false
+    const arm = () => {
+      audio.arm().then((ok) => {
+        if (ok && !cancelled) setAudioReady(true)
+      })
+    }
+    const events = ['pointerdown', 'touchend', 'keydown']
+    for (const type of events) window.addEventListener(type, arm, { passive: true })
+
+    const onVisibility = () => audio.setHidden(document.visibilityState !== 'visible')
+    document.addEventListener('visibilitychange', onVisibility)
+
+    return () => {
+      cancelled = true
+      for (const type of events) window.removeEventListener(type, arm)
+      document.removeEventListener('visibilitychange', onVisibility)
+      audio.destroy()
+      audioRef.current = null
+    }
+  }, [])
+
+  // The score belongs to the film, so it leaves with it.
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    if (showFilm && filmActive) audio.play()
+    else audio.stop()
+  }, [showFilm, filmActive])
+
+  useEffect(() => {
+    audioRef.current?.setMuted(muted)
+    writeMuted(muted)
+  }, [muted])
+
+  /* ------------------------------------------------- scroll lock + smoothing */
 
   useEffect(() => {
     const locked = phase === 'loading'
@@ -167,6 +237,32 @@ export default function App() {
           failed={false}
           onSkip={skipFilm}
         />
+      )}
+
+      {sound.enabled && FilmAudio.supported && showFilm && filmActive && (
+        <button
+          type="button"
+          className="soundtoggle"
+          // The pointerdown that opens this button is itself the gesture that
+          // unlocks the score, so the first press must not also mute it.
+          onClick={() => (audioReady ? setMuted((m) => !m) : setMuted(false))}
+          aria-pressed={audioReady && !muted}
+          aria-label={audioReady && !muted ? 'Turn the music off' : 'Turn the music on'}
+        >
+          <span
+            className="soundtoggle__bars"
+            data-playing={audioReady && !muted}
+            aria-hidden="true"
+          >
+            <i />
+            <i />
+            <i />
+            <i />
+          </span>
+          <span className="soundtoggle__label">
+            {audioReady && !muted ? 'Music on' : 'Music off'}
+          </span>
+        </button>
       )}
 
       <Nav visible={filmDone && !filmActive} />

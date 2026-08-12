@@ -97,10 +97,29 @@ budget is derived from the punch-in (`driftBudget`), which means it is exactly
 zero while the frame is shown whole — the opening shot, where the groom and
 bride enter at the extreme left and right edges, is guaranteed uncropped.
 
+**Sound** — a score plays under the film and fades out as the invitation takes
+over. It is `public/Audio/film.mp3`, configured by `sound` in
+`scenes.config.js` (set `enabled: false` to ship it silent).
+
+The track is about half a minute against a film that runs longer, so it loops.
+That is why this uses Web Audio rather than an `<audio>` element: an
+`AudioBufferSourceNode` loops without the gap an `HTMLMediaElement` leaves at
+the seam, and a `GainNode` gives real fades instead of a hard cut.
+
+No browser starts audio before the guest has interacted with the page, and
+**scrolling does not count** — only pointer, touch and key events grant
+activation. So nothing is constructed until the first such gesture, and the
+score then joins the film wherever it has got to. The toggle at the top left
+shows what is actually audible rather than what is merely intended, so it reads
+"Music off" until the score is genuinely unlocked and decoded; the guest's
+choice is remembered in `localStorage`. Background tabs suspend the context and
+keep their place.
+
 **Fallbacks** — no WebGL falls back to a Canvas2D renderer with the same
 framing rules; `prefers-reduced-motion` disables the drift, dust and scrub
 smoothing; and if the manifest cannot be loaded at all, the invitation is shown
-without the film rather than failing.
+without the film rather than failing. If the score cannot be fetched or
+decoded, or Web Audio is missing, the film simply plays silent.
 
 ---
 
@@ -115,6 +134,7 @@ src/
     stills.generated.js         written by the pipeline
   lib/
     FrameSequence.js            streaming loader + bounded decode window
+    FilmAudio.js                the score — gapless loop, fades, gesture unlock
     CinematicRenderer.js        WebGL stage, texture pool, Canvas2D fallback
     shaders.js                  the film pass and the dust layer
     manifest.js                 frame manifest + source-frame mapping
@@ -161,5 +181,5 @@ them are safely inboard, which reads as a slow push-in as they come together.
 How much punch-in a screen needs is computed per device, so a 9:16 handset uses
 none of it and the tallest Android uses all of it.
 
-`MOBILE FRAMES/` is superseded: it is a byte-for-byte copy of `DESKTOP FRAMES/`
-(verified across all 300 files) and nothing reads it.
+(An earlier `MOBILE FRAMES/` folder held a byte-for-byte copy of
+`DESKTOP FRAMES/` rather than any portrait artwork. It has been deleted.)
