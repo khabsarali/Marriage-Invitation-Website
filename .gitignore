@@ -1,0 +1,12 @@
+node_modules
+dist
+.DS_Store
+*.local
+.vite
+.claude
+
+# Source render output — 293 MB per folder, and only ever an input to
+# `npm run frames`. The optimised WebP the site actually serves is committed
+# under public/frames, so a fresh clone builds and deploys without them.
+DESKTOP FRAMES/
+MOBILE FRAMES/
