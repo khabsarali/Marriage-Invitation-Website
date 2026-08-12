@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-import { createStage, driftBudget } from '../../lib/CinematicRenderer.js'
+import { createStage, driftBudget, fillZoom } from '../../lib/CinematicRenderer.js'
 import { FrameSequence } from '../../lib/FrameSequence.js'
 import { toSourceFrame } from '../../lib/manifest.js'
 import {
@@ -13,6 +13,7 @@ import {
   gradeAt,
   loading,
   scroll,
+  fill,
 } from '../../config/scenes.config.js'
 import { coupleNames, invitation } from '../../config/wedding.config.js'
 
@@ -69,21 +70,30 @@ export default function CinematicExperience({
     const totalPixels = filmPixels + outroPixels
     const filmSpan = filmPixels / totalPixels
 
+    // Desktop and mobile are separate renders with different shapes — 16:9 and
+    // 9:16 — so the plate's aspect comes from the variant that was loaded.
+    const imageAspect = manifest.variants[profile].aspect ?? 16 / 9
+
     const gl = createStage(canvas, {
       maxPixels: isMobile ? 1_500_000 : 2_400_000,
       dustCount: isMobile ? 180 : 420,
       texturePool: isMobile ? 5 : 7,
+      imageAspect,
     })
 
     /* ------------------------------------------------------------- sizing */
 
     let viewWidth = 0
     let viewHeight = 0
+    // How far we punch in to reach the edges of *this* screen. Recomputed on
+    // resize because it depends on the viewport's shape, not just the artwork.
+    let screenFill = 1
 
     const resize = () => {
       const rect = stage.getBoundingClientRect()
       viewWidth = Math.max(1, Math.round(rect.width))
       viewHeight = Math.max(1, Math.round(rect.height))
+      screenFill = fillZoom(viewWidth / viewHeight, imageAspect, fill[profile])
       gl.resize(viewWidth, viewHeight, Math.min(window.devicePixelRatio || 1, 2))
     }
     resize()
@@ -194,9 +204,13 @@ export default function CinematicExperience({
       // Outro: the last frame holds while the film pushes in and dissolves.
       const outro = clamp01((smooth - filmSpan) / (1 - filmSpan))
       const outroEase = outro * outro
-      const zoom = grade.zoom * (1 + outroEase * 0.05)
+      // `screenFill` is the punch-in this screen would need to reach its edges;
+      // `grade.fill` is how much of it this beat is allowed to spend. The
+      // opening spends none, so the couple entering at the extreme edges of
+      // the plate is never cropped.
+      const zoom = grade.zoom * (1 + (screenFill - 1) * grade.fill) * (1 + outroEase * 0.05)
 
-      const budget = driftBudget(viewWidth / viewHeight, zoom)
+      const budget = driftBudget(viewWidth / viewHeight, zoom, imageAspect)
       const wobbleX = Math.sin(t * 0.13) * 0.55 + pointer.x * 0.35
       const wobbleY = Math.cos(t * 0.11) * 0.45 + pointer.y * 0.28
       const drift = reducedMotion ? 0 : grade.drift

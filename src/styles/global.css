@@ -1572,23 +1572,23 @@ html.lenis body {
 
 /* Portrait phones.
 
-   A 16:9 plate cannot fill a 9:19 screen without cutting the couple out of
-   the sides, so the film plays as a centred cinema band inside its own blurred
-   fill. Rather than letting the chapter titles sit on top of the couple, they
-   are placed in the clear space directly beneath the band — the phone reads as
-   a designed title card instead of a shrunken desktop layout.
+   The phone is served its own 9:16 render, punched in to reach the edges of
+   the screen, so the plate is full bleed — there is no longer a letterboxed
+   band with clear space under it to set the titles in. The chapter titles go
+   back over the image, low in the frame where that artwork keeps its floor:
+   the couple stands mid-frame with headroom above and floor below, so the
+   bottom sixth is the quietest part of every shot.
 
-   The band is 100vw wide and 56.25vw tall at zoom 1, growing to about 73vw at
-   the mobile punch-in, so the captions start below the widest case. */
+   The scrim carries the legibility instead of the empty space, so it is
+   weighted harder at the foot of the frame than the desktop version. */
 @media (orientation: portrait) and (max-width: 860px) {
   .cinematic__captions {
-    inset: calc(50% + 38vw) 0 auto;
-    align-content: start;
+    inset: auto 0 clamp(4rem, 11vh, 7.5rem);
   }
   .cinematic__edge {
     background:
-      linear-gradient(to bottom, rgba(6, 5, 4, 0.45), transparent 18%),
-      linear-gradient(to top, rgba(6, 5, 4, 0.72), transparent 46%);
+      linear-gradient(to bottom, rgba(6, 5, 4, 0.42), transparent 16%),
+      linear-gradient(to top, rgba(6, 5, 4, 0.82), rgba(6, 5, 4, 0.36) 26%, transparent 52%);
   }
   .chapter__title {
     font-size: clamp(2.4rem, 1.4rem + 6vw, 3.6rem);

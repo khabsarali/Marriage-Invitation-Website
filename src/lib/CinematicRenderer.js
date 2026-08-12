@@ -20,7 +20,13 @@ import {
   dustFragmentShader,
 } from './shaders.js'
 
-const IMAGE_ASPECT = 16 / 9
+/**
+ * The film ships as two renders — a 16:9 desktop plate and a 9:16 portrait
+ * plate — so the plate's shape is a property of the loaded variant, not a
+ * constant. This is only the fallback for a manifest that predates the
+ * per-variant `aspect` field.
+ */
+const DEFAULT_IMAGE_ASPECT = 16 / 9
 
 /* -------------------------------------------------------------- texture pool */
 
@@ -132,7 +138,7 @@ function createDust(count) {
 /* ---------------------------------------------------------------- WebGL path */
 
 class WebGLStage {
-  constructor(canvas, { maxPixels, dustCount, texturePool }) {
+  constructor(canvas, { maxPixels, dustCount, texturePool, imageAspect = DEFAULT_IMAGE_ASPECT }) {
     this.isWebGL = true
     this.maxPixels = maxPixels
     this.canvas = canvas
@@ -156,7 +162,7 @@ class WebGLStage {
       uTexB: { value: null },
       uMix: { value: 0 },
       uHasB: { value: 0 },
-      uImageAspect: { value: IMAGE_ASPECT },
+      uImageAspect: { value: imageAspect },
       uScreenAspect: { value: 1 },
       uZoom: { value: 1 },
       uOffset: { value: new THREE.Vector2() },
@@ -329,8 +335,8 @@ export function createStage(canvas, options) {
  * At zoom 1 the whole frame is on screen and the budget is exactly zero, which
  * is what keeps the couple from being clipped during the opening shot.
  */
-export function driftBudget(screenAspect, zoom) {
-  const ratio = screenAspect / IMAGE_ASPECT
+export function driftBudget(screenAspect, zoom, imageAspect = DEFAULT_IMAGE_ASPECT) {
+  const ratio = screenAspect / imageAspect
   const containX = Math.max(ratio, 1)
   const containY = Math.max(1 / ratio, 1)
   return {
@@ -339,4 +345,17 @@ export function driftBudget(screenAspect, zoom) {
   }
 }
 
-export { IMAGE_ASPECT }
+/**
+ * The punch-in that makes the plate reach every edge of the screen, clamped so
+ * the plate is never cropped harder than the artwork can take.
+ *
+ * A 9:16 render on a 9:19.5 phone needs about 1.22 to close the gap; a 9:16
+ * phone needs none at all. Deriving it per device — rather than baking one
+ * number into the grade — means the film fills the screen on a tall handset
+ * without over-cropping a short one.
+ */
+export function fillZoom(screenAspect, imageAspect, max) {
+  return Math.min(Math.max(imageAspect / screenAspect, 1), max)
+}
+
+export { DEFAULT_IMAGE_ASPECT }

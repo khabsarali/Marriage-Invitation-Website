@@ -5,8 +5,13 @@ dist
 .vite
 .claude
 
-# Source render output — 293 MB per folder, and only ever an input to
+# Source renders — 293 MB, 293 MB and 592 MB, and only ever inputs to
 # `npm run frames`. The optimised WebP the site actually serves is committed
 # under public/frames, so a fresh clone builds and deploys without them.
+#
+#   DESKTOP FRAMES/  the 16:9 landscape render, 1280x720
+#   Mobile/          the 9:16 portrait render, 1080x1920
+#   MOBILE FRAMES/   superseded — a byte-for-byte copy of DESKTOP FRAMES
 DESKTOP FRAMES/
+Mobile/
 MOBILE FRAMES/

@@ -42,16 +42,16 @@ The film's pacing, grading and chapter titles live in
 
 ## The frame pipeline
 
-`scripts/build-frames.mjs` reads `DESKTOP FRAMES/` and writes everything the
-site serves. It is the only place the source PNGs are touched.
+`scripts/build-frames.mjs` reads the two source renders and writes everything
+the site serves. It is the only place the source PNGs are touched.
 
 | | |
 |---|---|
-| Source | 300 PNG frames, 1280×720, 293 MB |
-| Deduplicated | 240 unique frames — the render was exported at 30 fps from a 24 fps source, so every 5th frame was an exact duplicate |
+| Source | two renders of 300 PNG frames — see [The two renders](#the-two-renders) |
+| Deduplicated | 240 unique frames — both were exported at 30 fps from a 24 fps source, so every 5th frame was an exact duplicate |
 | `public/frames/desktop` | 240 × WebP 1280×720 — **15.9 MB** |
-| `public/frames/mobile` | 240 × WebP 854×480 — **9.3 MB** |
-| `public/stills` | 8 gallery frames + 2 portrait crops |
+| `public/frames/mobile` | 240 × WebP 720×1280 — **16.5 MB** |
+| `public/stills` | 8 gallery frames + 2 portrait crops, cut from the desktop plate |
 
 It also writes `public/frames/manifest.json` (which maps the original frame
 numbers onto output indices, so the scene config stays readable) and
@@ -62,8 +62,8 @@ npm run frames             # full rebuild
 npm run frames -- --stills # re-cut only the gallery and portrait images
 ```
 
-> `DESKTOP FRAMES/` and `MOBILE FRAMES/` are **not in the repository** — 293 MB
-> each, and only ever inputs to this script. Everything the site serves is
+> The source render folders are **not in the repository** — 1.2 GB between
+> them, and only ever inputs to this script. Everything the site serves is
 > committed under `public/`, so a fresh clone builds and deploys as-is. You only
 > need the source PNGs back in place if you want to re-run the pipeline.
 
@@ -129,15 +129,37 @@ src/
 
 ---
 
-## A note on the mobile frames
+## The two renders
 
-`MOBILE FRAMES/` is byte-for-byte identical to `DESKTOP FRAMES/` — the same 300
-landscape 1280×720 PNGs. There is no portrait artwork in it, so the mobile
-experience is built from the same landscape source: the film plays as a centred
-cinema band inside its own blurred fill, punched in as far as the couple's
-position in each scene safely allows (`zoomMobile` in the scene config), with
-the chapter titles set in the clear space beneath the band.
+The film is supplied twice, once per orientation, and each variant is built
+from its own source:
 
-If genuine portrait renders are produced later, add them as a second source
-folder in `scripts/build-frames.mjs` and point the `mobile` variant at them —
-nothing else needs to change.
+| | | |
+|---|---|---|
+| `DESKTOP FRAMES/` | 300 × 1280×720 landscape | → `public/frames/desktop`, 240 × WebP 1280×720 |
+| `Mobile/` | 300 × 1080×1920 portrait | → `public/frames/mobile`, 240 × WebP 720×1280 |
+
+So a phone gets artwork actually composed for a phone, not a landscape plate
+letterboxed into a tall screen. 720 wide is deliberate: the stage renders at a
+device pixel ratio capped to 2, so a 390pt screen asks for 780 physical pixels
+across and anything smaller would visibly upscale.
+
+Both are 24 fps renders exported at 30 fps. They must decimate to the *same*
+240 frames, because the manifest carries one `sourceToOut` map that
+`scenes.config.js` is authored against — the pipeline asserts this rather than
+assuming it, and fails loudly if a future re-export changes one orientation's
+cadence.
+
+**Framing.** The portrait render opens the way the landscape one does, with the
+groom entering at the extreme left and the bride at the extreme right, so
+filling a 19.5:9 screen at that moment would crop the groom out of the film
+entirely. Each grade keyframe therefore carries a `fillMobile` permission
+(0..1) saying how much of the punch-in needed to reach that particular screen's
+edges the beat may spend. The opening spends none — the whole authored frame is
+shown, letterboxed into its own blurred fill — and it opens up once the two of
+them are safely inboard, which reads as a slow push-in as they come together.
+How much punch-in a screen needs is computed per device, so a 9:16 handset uses
+none of it and the tallest Android uses all of it.
+
+`MOBILE FRAMES/` is superseded: it is a byte-for-byte copy of `DESKTOP FRAMES/`
+(verified across all 300 files) and nothing reads it.
