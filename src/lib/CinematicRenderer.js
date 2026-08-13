@@ -346,16 +346,28 @@ export function driftBudget(screenAspect, zoom, imageAspect = DEFAULT_IMAGE_ASPE
 }
 
 /**
- * The punch-in that makes the plate reach every edge of the screen, clamped so
- * the plate is never cropped harder than the artwork can take.
+ * The punch-in that makes the plate reach every edge of the screen — the
+ * equivalent of `object-fit: cover` for a plate drawn through the shader,
+ * clamped so it is never cropped harder than the artwork can take.
  *
- * A 9:16 render on a 9:19.5 phone needs about 1.22 to close the gap; a 9:16
- * phone needs none at all. Deriving it per device — rather than baking one
- * number into the grade — means the film fills the screen on a tall handset
- * without over-cropping a short one.
+ * Also reports which way the crop runs, because the two directions are not
+ * equally safe on this footage. A vertical crop only takes ceiling and floor.
+ * A horizontal one eats into the left and right edges of the plate, which is
+ * exactly where the groom and bride enter during the opening. Callers use the
+ * axis to decide whether a beat's fill permission applies.
+ *
+ *   screen wider than the plate  -> crop top and bottom  (axis 'y')
+ *   screen taller than the plate -> crop left and right  (axis 'x')
+ *
+ * At 16:9 on a 16:9 screen this is exactly 1 and nothing is cropped at all.
+ *
+ * `caps` is a ceiling per axis, because how much crop the artwork can take is
+ * not the same in both directions and not the same for both renders.
  */
-export function fillZoom(screenAspect, imageAspect, max) {
-  return Math.min(Math.max(imageAspect / screenAspect, 1), max)
+export function coverZoom(screenAspect, imageAspect, caps) {
+  const ratio = screenAspect / imageAspect
+  const axis = ratio >= 1 ? 'y' : 'x'
+  return { zoom: Math.min(Math.max(ratio, 1 / ratio), caps[axis]), axis }
 }
 
 export { DEFAULT_IMAGE_ASPECT }

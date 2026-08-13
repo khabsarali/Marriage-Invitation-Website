@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-import { createStage, driftBudget, fillZoom } from '../../lib/CinematicRenderer.js'
+import { createStage, driftBudget, coverZoom } from '../../lib/CinematicRenderer.js'
 import { FrameSequence } from '../../lib/FrameSequence.js'
 import { toSourceFrame } from '../../lib/manifest.js'
 import {
@@ -85,15 +85,19 @@ export default function CinematicExperience({
 
     let viewWidth = 0
     let viewHeight = 0
-    // How far we punch in to reach the edges of *this* screen. Recomputed on
-    // resize because it depends on the viewport's shape, not just the artwork.
+    // How far we punch in to reach the edges of *this* screen, and which way
+    // that crop runs. Recomputed on resize because both depend on the
+    // viewport's shape, not just on the artwork.
     let screenFill = 1
+    let fillAxis = 'y'
 
     const resize = () => {
       const rect = stage.getBoundingClientRect()
       viewWidth = Math.max(1, Math.round(rect.width))
       viewHeight = Math.max(1, Math.round(rect.height))
-      screenFill = fillZoom(viewWidth / viewHeight, imageAspect, fill[profile])
+      const cover = coverZoom(viewWidth / viewHeight, imageAspect, fill[profile])
+      screenFill = cover.zoom
+      fillAxis = cover.axis
       gl.resize(viewWidth, viewHeight, Math.min(window.devicePixelRatio || 1, 2))
     }
     resize()
@@ -204,11 +208,13 @@ export default function CinematicExperience({
       // Outro: the last frame holds while the film pushes in and dissolves.
       const outro = clamp01((smooth - filmSpan) / (1 - filmSpan))
       const outroEase = outro * outro
-      // `screenFill` is the punch-in this screen would need to reach its edges;
-      // `grade.fill` is how much of it this beat is allowed to spend. The
-      // opening spends none, so the couple entering at the extreme edges of
-      // the plate is never cropped.
-      const zoom = grade.zoom * (1 + (screenFill - 1) * grade.fill) * (1 + outroEase * 0.05)
+      // `screenFill` is the punch-in this screen needs to cover its edges.
+      // A vertical crop only takes ceiling and floor, so it is always spent in
+      // full. A horizontal one eats into the sides of the plate, which is
+      // where the groom and bride enter during the opening — so there the
+      // beat's own permission decides, and the opening spends none of it.
+      const allowance = fillAxis === 'x' ? grade.fill : 1
+      const zoom = grade.zoom * (1 + (screenFill - 1) * allowance) * (1 + outroEase * 0.05)
 
       const budget = driftBudget(viewWidth / viewHeight, zoom, imageAspect)
       const wobbleX = Math.sin(t * 0.13) * 0.55 + pointer.x * 0.35

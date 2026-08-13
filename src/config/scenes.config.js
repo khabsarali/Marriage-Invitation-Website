@@ -90,49 +90,67 @@ export const beats = [
  *               these stay near it — this is an artistic push, not a rescue
  *               crop.
  *   fillMobile— how much of the extra punch-in needed to reach the edges of a
- *               taller-than-9:16 handset this beat may spend, 0..1. How much
- *               that is depends on the device and is computed at runtime; this
- *               is only the permission. 0 shows the authored frame whole,
- *               letterboxed into its own blurred fill.
+ *   fillDesktop taller-than-9:16 handset (or a narrower-than-16:9 window) this
+ *               beat may spend, 0..1. How much that is depends on the device
+ *               and is computed at runtime; this is only the permission. 0
+ *               shows the authored frame whole, letterboxed into its own
+ *               blurred fill.
  *
- *               The portrait render opens exactly as the landscape one does —
- *               the groom entering at the extreme left, the bride at the
- *               extreme right — so filling a 19.5:9 screen there would crop
- *               the groom out of the film entirely. The opening is therefore
- *               pinned to 0 and only opens up once they are both safely
- *               inboard, which lands as a slow push-in as they come together.
+ *               These only bite when the crop runs horizontally. A window
+ *               wider than 16:9 crops ceiling and floor instead, which is safe
+ *               in every shot, so it always covers in full.
+ *
+ *               Both renders open the same way — the groom entering at the
+ *               extreme left, the bride at the extreme right — so cropping
+ *               sideways there would take one of them out of the film. The
+ *               opening is pinned to 0 in both and only opens up once they are
+ *               safely inboard, which lands as a slow push-in as they come
+ *               together.
  *   drift     — how far the slow camera float is allowed to travel
  */
 export const gradeKeys = [
   // Both of them enter at the extreme edges, so the opening must not crop.
-  { frame: 1,   exposure: 0.96, contrast: 1.05, saturation: 1.04, tint: [1.03, 1.00, 0.94], vignette: 0.50, bloom: 0.10, blur: 0.00, zoom: 1.000, zoomMobile: 1.000, fillMobile: 0.00, drift: 0.5 },
-  { frame: 20,  exposure: 1.00, contrast: 1.04, saturation: 1.05, tint: [1.03, 1.00, 0.94], vignette: 0.42, bloom: 0.12, blur: 0.00, zoom: 1.000, zoomMobile: 1.000, fillMobile: 0.00, drift: 1.0 },
-  { frame: 60,  exposure: 1.01, contrast: 1.03, saturation: 1.05, tint: [1.02, 1.00, 0.95], vignette: 0.40, bloom: 0.14, blur: 0.00, zoom: 1.015, zoomMobile: 1.010, fillMobile: 1.00, drift: 1.0 },
-  { frame: 84,  exposure: 1.06, contrast: 0.98, saturation: 0.98, tint: [1.05, 1.00, 0.90], vignette: 0.34, bloom: 0.46, blur: 0.55, zoom: 1.035, zoomMobile: 1.020, fillMobile: 1.00, drift: 0.6 },
-  { frame: 100, exposure: 1.00, contrast: 1.05, saturation: 1.04, tint: [1.03, 0.99, 0.94], vignette: 0.42, bloom: 0.16, blur: 0.00, zoom: 1.020, zoomMobile: 1.010, fillMobile: 1.00, drift: 1.0 },
-  { frame: 130, exposure: 1.00, contrast: 1.06, saturation: 1.05, tint: [1.03, 0.99, 0.93], vignette: 0.40, bloom: 0.18, blur: 0.00, zoom: 1.040, zoomMobile: 1.025, fillMobile: 1.00, drift: 1.0 },
-  { frame: 168, exposure: 1.07, contrast: 0.98, saturation: 0.97, tint: [1.05, 1.00, 0.91], vignette: 0.34, bloom: 0.48, blur: 0.55, zoom: 1.045, zoomMobile: 1.030, fillMobile: 1.00, drift: 0.6 },
-  { frame: 190, exposure: 1.01, contrast: 1.02, saturation: 1.00, tint: [1.01, 1.00, 0.99], vignette: 0.38, bloom: 0.16, blur: 0.00, zoom: 1.030, zoomMobile: 1.020, fillMobile: 1.00, drift: 1.0 },
-  { frame: 240, exposure: 1.02, contrast: 1.01, saturation: 1.00, tint: [1.01, 1.00, 0.99], vignette: 0.36, bloom: 0.16, blur: 0.00, zoom: 1.050, zoomMobile: 1.030, fillMobile: 1.00, drift: 1.0 },
-  { frame: 275, exposure: 1.02, contrast: 1.01, saturation: 1.01, tint: [1.02, 1.00, 0.98], vignette: 0.38, bloom: 0.18, blur: 0.00, zoom: 1.070, zoomMobile: 1.040, fillMobile: 1.00, drift: 0.7 },
-  { frame: 300, exposure: 1.00, contrast: 1.02, saturation: 1.00, tint: [1.02, 1.00, 0.98], vignette: 0.46, bloom: 0.20, blur: 0.00, zoom: 1.090, zoomMobile: 1.050, fillMobile: 1.00, drift: 0.3 },
+  { frame: 1,   exposure: 0.96, contrast: 1.05, saturation: 1.04, tint: [1.03, 1.00, 0.94], vignette: 0.50, bloom: 0.10, blur: 0.00, zoom: 1.000, zoomMobile: 1.000, fillMobile: 0.00, fillDesktop: 0.00, drift: 0.5 },
+  { frame: 20,  exposure: 1.00, contrast: 1.04, saturation: 1.05, tint: [1.03, 1.00, 0.94], vignette: 0.42, bloom: 0.12, blur: 0.00, zoom: 1.000, zoomMobile: 1.000, fillMobile: 0.00, fillDesktop: 0.00, drift: 1.0 },
+  { frame: 60,  exposure: 1.01, contrast: 1.03, saturation: 1.05, tint: [1.02, 1.00, 0.95], vignette: 0.40, bloom: 0.14, blur: 0.00, zoom: 1.015, zoomMobile: 1.010, fillMobile: 1.00, fillDesktop: 1.00, drift: 1.0 },
+  { frame: 84,  exposure: 1.06, contrast: 0.98, saturation: 0.98, tint: [1.05, 1.00, 0.90], vignette: 0.34, bloom: 0.46, blur: 0.55, zoom: 1.035, zoomMobile: 1.020, fillMobile: 1.00, fillDesktop: 1.00, drift: 0.6 },
+  { frame: 100, exposure: 1.00, contrast: 1.05, saturation: 1.04, tint: [1.03, 0.99, 0.94], vignette: 0.42, bloom: 0.16, blur: 0.00, zoom: 1.020, zoomMobile: 1.010, fillMobile: 1.00, fillDesktop: 1.00, drift: 1.0 },
+  { frame: 130, exposure: 1.00, contrast: 1.06, saturation: 1.05, tint: [1.03, 0.99, 0.93], vignette: 0.40, bloom: 0.18, blur: 0.00, zoom: 1.040, zoomMobile: 1.025, fillMobile: 1.00, fillDesktop: 1.00, drift: 1.0 },
+  { frame: 168, exposure: 1.07, contrast: 0.98, saturation: 0.97, tint: [1.05, 1.00, 0.91], vignette: 0.34, bloom: 0.48, blur: 0.55, zoom: 1.045, zoomMobile: 1.030, fillMobile: 1.00, fillDesktop: 1.00, drift: 0.6 },
+  { frame: 190, exposure: 1.01, contrast: 1.02, saturation: 1.00, tint: [1.01, 1.00, 0.99], vignette: 0.38, bloom: 0.16, blur: 0.00, zoom: 1.030, zoomMobile: 1.020, fillMobile: 1.00, fillDesktop: 1.00, drift: 1.0 },
+  { frame: 240, exposure: 1.02, contrast: 1.01, saturation: 1.00, tint: [1.01, 1.00, 0.99], vignette: 0.36, bloom: 0.16, blur: 0.00, zoom: 1.050, zoomMobile: 1.030, fillMobile: 1.00, fillDesktop: 1.00, drift: 1.0 },
+  { frame: 275, exposure: 1.02, contrast: 1.01, saturation: 1.01, tint: [1.02, 1.00, 0.98], vignette: 0.38, bloom: 0.18, blur: 0.00, zoom: 1.070, zoomMobile: 1.040, fillMobile: 1.00, fillDesktop: 1.00, drift: 0.7 },
+  { frame: 300, exposure: 1.00, contrast: 1.02, saturation: 1.00, tint: [1.02, 1.00, 0.98], vignette: 0.46, bloom: 0.20, blur: 0.00, zoom: 1.090, zoomMobile: 1.050, fillMobile: 1.00, fillDesktop: 1.00, drift: 0.3 },
 ]
 
 /**
- * The most the renderer may punch in to reach the edges of the screen, on top
- * of the zoom above.
+ * The most the renderer may punch in to cover the edges of the screen, on top
+ * of the zoom above. A screen that is exactly the plate's shape needs 1 and
+ * gets 1, so nothing is cropped there at all.
  *
- * Desktop stays at 1: the 16:9 plate is shown whole on every window shape, so
- * the opening — where the two of them enter at the extreme left and right — is
- * guaranteed uncropped.
+ * Desktop allows up to 1.12. A 16:9 plate needs 1.11 to cover a 1440x900
+ * window and about 1.13 to cover a 1080p window once the browser chrome is
+ * subtracted, so the common desktop shapes cover completely. The ceiling is
+ * 1.12 rather than higher because past roughly 1.19 a vertical crop starts to
+ * take the groom's turban in the barat and the couple's feet in the walima —
+ * measured against the frames, not guessed. Very wide, short windows therefore
+ * keep a slim blurred margin instead of losing the composition.
  *
- * Mobile allows up to 1.26. The 9:16 render needs about 1.22 to fill a 19.5:9
- * handset and 1.25 to fill the tallest common Android; a 16:9 phone needs none
- * of it and gets none. At 1.26 the visible band is the middle 79% of the frame
- * (x 0.10..0.90) and the couple sits inside the middle 60% of every shot, so
- * there is real margin left over for the drift to move within.
+ * Mobile allows up to 1.26 sideways. The 9:16 render needs about 1.22 to fill
+ * a 19.5:9 handset and 1.25 to fill the tallest common Android; a 16:9 phone
+ * needs none of it and gets none. At 1.26 the visible band is the middle 79%
+ * of the frame (x 0.10..0.90) and the couple sits inside the middle 60% of
+ * every shot, so there is real margin left over for the drift to move within.
+ *
+ * Mobile's vertical ceiling is 1 — no punch-in at all. A phone turned on its
+ * side puts a 9:16 plate in a landscape window, and covering that would mean
+ * cropping the portrait composition top and bottom, straight through their
+ * heads and feet. It stays letterboxed in its blurred fill instead.
  */
-export const fill = { desktop: 1.0, mobile: 1.26 }
+export const fill = {
+  desktop: { x: 1.12, y: 1.12 },
+  mobile: { x: 1.26, y: 1.0 },
+}
 
 /**
  * The closing title — the couple's names rise over the final sofa frame before
@@ -187,8 +205,7 @@ export const sceneBeats = beats.filter((b) => b.kind === 'scene')
 export const frameToProgress = (frame) => (frame - 1) / (SOURCE_COUNT - 1)
 
 const pickZoom = (key, isMobile) => (isMobile ? key.zoomMobile : key.zoom)
-// Desktop is always shown whole, so it never spends any of the fill punch-in.
-const pickFill = (key, isMobile) => (isMobile ? key.fillMobile : 0)
+const pickFill = (key, isMobile) => (isMobile ? key.fillMobile : key.fillDesktop)
 
 /** Interpolate the grade keyframes at a given source frame. */
 export function gradeAt(frame, isMobile = false) {

@@ -98,13 +98,26 @@ texture pool keeps GPU uploads to one per *frame change* rather than one per
 rendered tick. The pass does the grade, defocus, bloom, vignette, grain and the
 blurred backdrop fill together; a drifting dust layer sits on top.
 
-**Framing** — the plate is always drawn *contain*, so the whole 16:9 frame is on
-screen and the couple can never be clipped by the viewport. The leftover area is
-filled with a heavily blurred, darkened copy of the same frame, so there is
-never a hard letterbox or an empty margin at any aspect ratio. The camera drift
-budget is derived from the punch-in (`driftBudget`), which means it is exactly
-zero while the frame is shown whole — the opening shot, where the groom and
-bride enter at the extreme left and right edges, is guaranteed uncropped.
+**Framing** — the plate is drawn *cover*: it reaches every edge of the window,
+which is `object-fit: cover` expressed in the shader rather than in CSS, since
+the film is a canvas and not an `<img>`. `coverZoom` works out the punch-in the
+window needs and, crucially, **which way the crop runs**, because the two
+directions are not equally safe. A window wider than 16:9 crops ceiling and
+floor, which is harmless in every shot. A narrower one crops the left and right
+edges of the plate — exactly where the groom and bride enter during the
+opening — so there each beat's own `fillDesktop` permission decides, and the
+opening spends none of it and is guaranteed uncropped.
+
+The punch-in is capped per axis (`fill` in the scene config). Desktop stops at
+1.12: a 1440×900 window needs 1.11 and a 1080p window about 1.13, so the common
+shapes cover completely, while past roughly 1.19 a vertical crop starts taking
+the groom's turban and the couple's feet — measured against the frames, and
+drift adds about 3% on top of it. Very wide, short windows therefore keep a
+slim blurred margin rather than lose the composition. Whatever margin remains
+is filled with a heavily blurred, darkened copy of the same frame, so there is
+never a hard letterbox at any aspect ratio. The camera drift budget is derived
+from the punch-in (`driftBudget`), so it is exactly zero while the frame is
+shown whole.
 
 **Sound** — a score plays under the film and fades out as the invitation takes
 over. It is `public/Audio/film.mp3`, configured by `sound` in
