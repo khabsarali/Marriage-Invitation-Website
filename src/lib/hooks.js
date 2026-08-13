@@ -18,17 +18,29 @@ export function useMediaQuery(query) {
 }
 
 /**
- * Which asset set to serve. Decided once on mount and deliberately not
- * re-evaluated on resize — swapping the frame set mid-film would throw away
- * everything already downloaded.
+ * Which asset set to serve — the portrait render or the landscape one.
+ * Decided once on mount and deliberately not re-evaluated on resize, because
+ * swapping the frame set mid-film would throw away everything already
+ * downloaded. That is also why this cannot be a CSS media query.
+ *
+ * Size alone is not enough to identify a phone. The test is against the
+ * viewport, and browser chrome costs about 110px of height, so a 1366x768
+ * laptop reports 1366x657 and a 1440x900 MacBook reports 1440x790 — both under
+ * any sensible small-side threshold, and both were being served the portrait
+ * film. Requiring a coarse, hoverless pointer settles it: that is true of
+ * phones and tablets, false of every laptop, and true under device emulation
+ * in devtools.
+ *
+ * Size still decides among touch devices, so a large tablet keeps the
+ * landscape film while a phone gets the portrait one, in either orientation.
  */
 export function useDeviceProfile() {
   return useMemo(() => {
     if (typeof window === 'undefined') return { isMobile: false, isTouch: false }
-    const isTouch = window.matchMedia('(hover: none)').matches
+    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches
     const isSmall = Math.min(window.innerWidth, window.innerHeight) <= 820
     const lowMemory = (navigator.deviceMemory ?? 8) <= 4
-    return { isMobile: isSmall || (isTouch && lowMemory), isTouch }
+    return { isMobile: isTouch && (isSmall || lowMemory), isTouch }
   }, [])
 }
 
