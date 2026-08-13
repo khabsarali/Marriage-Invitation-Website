@@ -33,14 +33,21 @@ export function useMediaQuery(query) {
  *
  * Size still decides among touch devices, so a large tablet keeps the
  * landscape film while a phone gets the portrait one, in either orientation.
+ *
+ * A narrow window counts as mobile whatever it is pointed at, which is the
+ * plain max-width:768px reading and makes a resized desktop browser behave the
+ * way anyone testing responsiveness expects. That test is on width alone, not
+ * on the smaller side: laptop viewports are at least 1024 wide, so it cannot
+ * catch one the way a min(width, height) test did.
  */
 export function useDeviceProfile() {
   return useMemo(() => {
     if (typeof window === 'undefined') return { isMobile: false, isTouch: false }
     const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches
+    const isNarrow = window.innerWidth <= 768
     const isSmall = Math.min(window.innerWidth, window.innerHeight) <= 820
     const lowMemory = (navigator.deviceMemory ?? 8) <= 4
-    return { isMobile: isTouch && (isSmall || lowMemory), isTouch }
+    return { isMobile: isNarrow || (isTouch && (isSmall || lowMemory)), isTouch }
   }, [])
 }
 
