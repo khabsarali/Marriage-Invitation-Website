@@ -17,7 +17,7 @@ import Footer from './components/site/Footer.jsx'
 
 import { FrameSequence } from './lib/FrameSequence.js'
 import { FilmAudio } from './lib/FilmAudio.js'
-import { loadManifest } from './lib/manifest.js'
+import { loadManifest, resolveVariant } from './lib/manifest.js'
 import { useDeviceProfile, usePrefersReducedMotion } from './lib/hooks.js'
 import { loading, sound } from './config/scenes.config.js'
 
@@ -73,7 +73,7 @@ export default function App() {
   const reducedMotion = usePrefersReducedMotion()
   useStableViewportHeight()
 
-  const [manifest, setManifest] = useState(null)
+  const [variant, setVariant] = useState(null)
   const [sequence, setSequence] = useState(null)
   const [progress, setProgress] = useState(0)
   const [phase, setPhase] = useState('loading') // loading | leaving | ready | filmless
@@ -98,10 +98,13 @@ export default function App() {
         if (cancelled) return
 
         const profile = isMobile ? 'mobile' : 'desktop'
-        const variant = loaded.variants[profile]
+        // The two renders drop different duplicate frames, so the count and
+        // the frame map both come from the chosen variant, never from a shared
+        // top-level value.
+        const variant = resolveVariant(loaded, profile)
         const seq = new FrameSequence({
           basePath: variant.path,
-          count: loaded.count,
+          count: variant.count,
           concurrency: loading.concurrency[profile],
           decodeBudget: loading.textureBudget[profile],
           coarseStride: loading.coarseStride,
@@ -114,7 +117,7 @@ export default function App() {
         })
         if (cancelled) return
 
-        setManifest(loaded)
+        setVariant(variant)
         setSequence(seq)
         setPhase('leaving')
         setTimeout(() => !cancelled && setPhase('ready'), 900)
@@ -268,9 +271,9 @@ export default function App() {
       <Nav visible={filmDone && !filmActive} />
 
       <main className="page">
-        {showFilm && sequence && manifest && (
+        {showFilm && sequence && variant && (
           <CinematicExperience
-            manifest={manifest}
+            variant={variant}
             sequence={sequence}
             isMobile={isMobile}
             reducedMotion={reducedMotion}

@@ -39,7 +39,7 @@ function envelope(value, from, to, shoulder) {
  * state, so the whole experience costs one render pass per frame.
  */
 export default function CinematicExperience({
-  manifest,
+  variant,
   sequence,
   isMobile,
   reducedMotion,
@@ -62,7 +62,7 @@ export default function CinematicExperience({
     const section = sectionRef.current
     const stage = stageRef.current
     const canvas = canvasRef.current
-    if (!section || !stage || !canvas || !manifest || !sequence) return
+    if (!section || !stage || !canvas || !variant || !sequence) return
 
     const profile = isMobile ? 'mobile' : 'desktop'
     const filmPixels = SOURCE_COUNT * scroll.pixelsPerFrame[profile]
@@ -72,7 +72,7 @@ export default function CinematicExperience({
 
     // Desktop and mobile are separate renders with different shapes — 16:9 and
     // 9:16 — so the plate's aspect comes from the variant that was loaded.
-    const imageAspect = manifest.variants[profile].aspect ?? 16 / 9
+    const imageAspect = variant.aspect ?? 16 / 9
 
     const gl = createStage(canvas, {
       maxPixels: isMobile ? 1_500_000 : 2_400_000,
@@ -193,9 +193,9 @@ export default function CinematicExperience({
       if (Math.abs(target - smooth) < 0.00005) smooth = target
 
       const filmT = clamp01(smooth / filmSpan)
-      const outFloat = filmT * (manifest.count - 1)
+      const outFloat = filmT * (variant.count - 1)
       const index = Math.round(outFloat)
-      const sourceFrame = toSourceFrame(manifest, outFloat)
+      const sourceFrame = toSourceFrame(variant, outFloat)
 
       if (index !== lastIndex) {
         lastIndex = index
@@ -289,7 +289,7 @@ export default function CinematicExperience({
       document.removeEventListener('visibilitychange', onVisibility)
       gl.dispose()
     }
-  }, [manifest, sequence, isMobile, reducedMotion, onFinish, onActiveChange, captionBeats])
+  }, [variant, sequence, isMobile, reducedMotion, onFinish, onActiveChange, captionBeats])
 
   const skip = () => {
     const section = sectionRef.current

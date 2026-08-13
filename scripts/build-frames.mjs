@@ -213,56 +213,48 @@ async function main() {
     return kept
   }
 
-  let kept = [1]
-  if (!STILLS_ONLY) {
-    const perVariant = []
-    for (const v of VARIANTS) {
-      const k = await decimate(srcPathFor(v))
-      console.log(`dedupe ${v.key}: ${SOURCE_COUNT} source frames -> ${k.length} unique`)
-      perVariant.push({ key: v.key, kept: k })
+  /** Each source frame maps to the most recent kept frame at or before it. */
+  const mapSourceToOut = (kept) => {
+    const map = new Array(SOURCE_COUNT + 1).fill(0)
+    for (let n = 1, out = 0; n <= SOURCE_COUNT; n++) {
+      while (out + 1 < kept.length && kept[out + 1] <= n) out++
+      map[n] = out
     }
-
-    // One shared sourceToOut only holds if every source decimated the same way.
-    const [first, ...rest] = perVariant
-    for (const other of rest) {
-      if (first.kept.length !== other.kept.length ||
-          first.kept.some((n, i) => n !== other.kept[i])) {
-        const diverge = first.kept.findIndex((n, i) => n !== other.kept[i])
-        throw new Error(
-          `${first.key} and ${other.key} do not share a frame cadence ` +
-            `(${first.kept.length} vs ${other.kept.length} unique frames, ` +
-            `first divergence at output index ${diverge < 0 ? 'end' : diverge}). ` +
-            `The manifest carries one sourceToOut map for every variant, so the ` +
-            `two renders must drop the same duplicates. Re-export them at a ` +
-            `matching frame rate, or give each variant its own map.`
-        )
-      }
-    }
-    kept = first.kept
+    return map
   }
 
-  // Each source frame maps to the most recent kept frame at or before it.
-  const sourceToOut = new Array(SOURCE_COUNT + 1).fill(0)
-  for (let n = 1, out = 0; n <= SOURCE_COUNT; n++) {
-    while (out + 1 < kept.length && kept[out + 1] <= n) out++
-    sourceToOut[n] = out
+  // Every variant carries its own decimation. The two renders were once
+  // exported at a matching cadence and could share one map, but they are
+  // separate exports and nothing guarantees that — the second one landed with
+  // a different set of duplicates. Keeping a map per variant means each film
+  // stays in step with the scene beats no matter how its own export was cut.
+  for (const v of VARIANTS) {
+    v.kept = STILLS_ONLY ? [1] : await decimate(srcPathFor(v))
+    v.sourceToOut = mapSourceToOut(v.kept)
+    if (!STILLS_ONLY) {
+      console.log(`dedupe ${v.key}: ${SOURCE_COUNT} source frames -> ${v.kept.length} unique`)
+    }
   }
+
+  // Stills and the LQIP are cut from whichever frame the config names, so they
+  // only need the lead variant's own decimation.
+  const kept = VARIANTS[0].kept
 
   // ---- pass 2: encode -------------------------------------------------------
   const bytes = {}
   for (const v of STILLS_ONLY ? [] : VARIANTS) {
     let total = 0
-    for (let i = 0; i < kept.length; i++) {
+    for (let i = 0; i < v.kept.length; i++) {
       const out = path.join(OUT_DIR, v.dir, `f${pad(i)}.webp`)
-      await sharp(srcPathFor(v)(kept[i]))
+      await sharp(srcPathFor(v)(v.kept[i]))
         .resize(v.width, v.height, { fit: 'fill' })
         .webp({ quality: v.quality, effort: 5, smartSubsample: true })
         .toFile(out)
       total += (await fs.stat(out)).size
-      if (i % 40 === 0) process.stdout.write(`  ${v.key} ${i}/${kept.length}\r`)
+      if (i % 40 === 0) process.stdout.write(`  ${v.key} ${i}/${v.kept.length}\r`)
     }
     bytes[v.key] = total
-    console.log(`  ${v.key}: ${kept.length} files, ${(total / 1048576).toFixed(1)} MB   `)
+    console.log(`  ${v.key}: ${v.kept.length} files, ${(total / 1048576).toFixed(1)} MB   `)
   }
 
   // ---- stills + portraits ---------------------------------------------------
@@ -323,7 +315,7 @@ async function main() {
     const landscape = v.width >= v.height
     const w = landscape ? 32 : Math.round(32 * (v.width / v.height))
     const h = landscape ? Math.round(32 * (v.height / v.width)) : 32
-    const buf = await sharp(srcPathFor(v)(kept[0]))
+    const buf = await sharp(srcPathFor(v)(v.kept[0]))
       .resize(w, h, { fit: 'fill' })
       .blur(1.4)
       .webp({ quality: 40 })
@@ -335,11 +327,13 @@ async function main() {
   const manifest = {
     generatedFrom: Object.fromEntries(VARIANTS.map((v) => [v.key, `${v.from}/`])),
     sourceCount: SOURCE_COUNT,
-    count: kept.length,
     /**
-     * `aspect` and `lqip` both differ per variant — desktop is a 16:9 render,
-     * mobile a 9:16 one — so neither can live at the top level without one
-     * device carrying a trace of the other's artwork.
+     * Everything that describes a render lives inside its own variant. The two
+     * are separate exports, so they differ in shape (16:9 against 9:16), in
+     * placeholder, and — since the second export — in which duplicate frames
+     * they drop, which means `count` and `sourceToOut` cannot be shared either.
+     *
+     * sourceToOut[sourceFrameNumber] -> that variant's output frame index.
      */
     variants: Object.fromEntries(
       VARIANTS.map((v) => [
@@ -349,21 +343,25 @@ async function main() {
           width: v.width,
           height: v.height,
           aspect: v.width / v.height,
+          count: v.kept.length,
+          sourceToOut: v.sourceToOut,
           lqip: lqip[v.key],
           bytes: bytes[v.key],
         },
       ])
     ),
-    /** sourceToOut[sourceFrameNumber] -> output frame index */
-    sourceToOut,
     stills: STILLS.map((s) => ({ ...s, src: `/stills/${s.name}.webp` })),
   }
   await fs.writeFile(path.join(OUT_DIR, 'manifest.json'), JSON.stringify(manifest))
 
-  // Human-readable mapping for the scene config.
+  // Human-readable mapping for the scene config, per variant since the two
+  // exports no longer decimate alike.
   const marks = [1, 68, 69, 99, 100, 147, 148, 188, 189, 243, 244, 256, 257, 300]
   console.log('\nsource frame -> output index')
-  console.log(marks.map((m) => `  ${m} -> ${sourceToOut[m]}`).join('\n'))
+  console.log(`  ${'frame'.padStart(5)}  ${VARIANTS.map((v) => v.key.padStart(7)).join('')}`)
+  for (const m of marks) {
+    console.log(`  ${String(m).padStart(5)}  ${VARIANTS.map((v) => String(v.sourceToOut[m]).padStart(7)).join('')}`)
+  }
 }
 
 main().catch((err) => {
