@@ -1,5 +1,5 @@
 import { Reveal, Ornament } from './primitives.jsx'
-import { coupleNames, invitation, weddingDate, couple } from '../../config/wedding.config.js'
+import { coupleNames, invitation, weddingDate, couple, logo } from '../../config/wedding.config.js'
 
 export default function Hero() {
   return (
@@ -7,7 +7,13 @@ export default function Hero() {
       <div className="hero__glow" aria-hidden="true" />
 
       <div className="hero__inner">
-        <Reveal as="p" className="hero__bismillah">
+        {/* The mark alone, not the full lockup — the names are set below it
+            in type, and printing them twice would read as a mistake. */}
+        <Reveal>
+          <img className="hero__mark" src={logo.mark} alt={logo.alt} width="640" height="597" />
+        </Reveal>
+
+        <Reveal as="p" className="hero__bismillah" delay={60}>
           {invitation.blessing}
         </Reveal>
 

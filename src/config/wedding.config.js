@@ -9,23 +9,24 @@
 
 export const couple = {
   bride: {
-    name: 'Ayesha',
-    fullName: 'Ayesha Khan',
+    name: 'Radia',
+    // No surname supplied yet — add it here and it flows to the couple section.
+    fullName: 'Radia',
     // Shown in the couple section.
-    parents: 'Daughter of Mr. & Mrs. Imran Khan',
+    parents: 'Daughter of Mr. & Mrs. [family name]',
     words: 'A quiet reader, a loud laugher, and the calm at the centre of every room she walks into.',
     image: '/stills/bride.webp',
   },
   groom: {
-    name: 'Hamza',
-    fullName: 'Hamza Ali',
-    parents: 'Son of Mr. & Mrs. Tariq Ali',
+    name: 'Umar',
+    fullName: 'Umar',
+    parents: 'Son of Mr. & Mrs. [family name]',
     words: 'An early riser, a hopeless romantic, and the one who has been counting down since the day she said yes.',
     image: '/stills/groom.webp',
   },
-  /** Order the names appear as, e.g. "Ayesha & Hamza". */
+  /** Order the names appear as, e.g. "Radia & Umar" — matches the monogram. */
   order: ['bride', 'groom'],
-  hashtag: '#AyeshaWedsHamza',
+  hashtag: '#RadiaWedsUmar',
 }
 
 export const invitation = {
@@ -130,7 +131,9 @@ export const rsvp = {
    */
   endpoint: null,
   whatsapp: '923001234567',
-  email: 'rsvp@ayeshaandhamza.com',
+  // No address supplied yet. Left null rather than guessed, so the form does
+  // not offer a mailto that would bounce; set it and the button reappears.
+  email: null,
 }
 
 export const contacts = [
@@ -141,10 +144,19 @@ export const contacts = [
 ]
 
 export const site = {
-  title: 'Ayesha & Hamza — Wedding Invitation',
+  title: 'Radia & Umar — Wedding Invitation',
   description:
-    'Together with their families, Ayesha & Hamza request the pleasure of your presence. 13–15 November 2026, Lahore.',
+    'Together with their families, Radia & Umar request the pleasure of your presence. 13–15 November 2026, Lahore.',
   footerNote: 'We cannot wait to celebrate with you.',
+}
+
+/** The monogram, built by `npm run logo` from brand/monogram.jpg. */
+export const logo = {
+  /** Just the RU mark — for the nav, the loader and the hero. */
+  mark: '/brand/mark.webp',
+  /** The mark with the names set beneath it. */
+  full: '/brand/logo.webp',
+  alt: 'Radia & Umar',
 }
 
 /* -------------------------------------------------------------------------- */

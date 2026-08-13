@@ -1,4 +1,4 @@
-import { couple } from '../../config/wedding.config.js'
+import { logo } from '../../config/wedding.config.js'
 
 /**
  * The first thing anyone sees. Holds the page still until enough of the film
@@ -10,11 +10,16 @@ export default function StoryLoader({ progress, leaving, failed, onSkip }) {
   return (
     <div className={`loader${leaving ? ' loader--leaving' : ''}`} role="status" aria-live="polite">
       <div className="loader__inner">
-        <div className="loader__monogram" aria-hidden="true">
-          <span>{couple[couple.order[0]].name.charAt(0)}</span>
-          <span className="loader__amp">&amp;</span>
-          <span>{couple[couple.order[1]].name.charAt(0)}</span>
-        </div>
+        {/* Eager and high priority: this is the only thing on screen while the
+            film downloads, so it must not itself be waited for. */}
+        <img
+          className="loader__monogram"
+          src={logo.mark}
+          alt={logo.alt}
+          width="640"
+          height="597"
+          fetchPriority="high"
+        />
 
         <p className="loader__text">{failed ? 'Opening the invitation…' : 'Loading our story…'}</p>
 

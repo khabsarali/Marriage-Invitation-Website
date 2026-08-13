@@ -1,4 +1,4 @@
-import { coupleNames } from '../../config/wedding.config.js'
+import { logo } from '../../config/wedding.config.js'
 
 const LINKS = [
   { href: '#invitation', label: 'Invitation' },
@@ -22,7 +22,7 @@ export default function Nav({ visible }) {
   return (
     <header className={`nav${visible ? ' is-visible' : ''}`} aria-hidden={!visible}>
       <a className="nav__mark" href="#invitation" onClick={(e) => go(e, '#invitation')}>
-        {coupleNames[0].charAt(0)} <span>&amp;</span> {coupleNames[1].charAt(0)}
+        <img src={logo.mark} alt={logo.alt} width="640" height="597" />
       </a>
       <nav aria-label="Sections">
         <ul className="nav__list">

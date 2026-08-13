@@ -12,6 +12,7 @@ the film ends does the invitation itself begin.
 ```bash
 npm install
 npm run frames     # one-off: turns the source PNGs into optimised web assets
+npm run logo       # one-off: keys the monogram off its card and cuts favicons
 npm run dev
 ```
 
@@ -61,6 +62,14 @@ numbers onto output indices, so the scene config stays readable) and
 npm run frames             # full rebuild
 npm run frames -- --stills # re-cut only the gallery and portrait images
 ```
+
+Nothing about the source filenames is hardcoded. Each folder is read at build
+time, frames are ordered by the last run of digits in each name — which is the
+frame number under both `frame 00 (7).png` and `ezgif-frame-007.png` — and the
+count, extension, numbering range and any gaps are reported. A duplicate number
+is a hard error, because the frame order would be ambiguous. The frame count is
+cross-checked against `SOURCE_COUNT` in `scenes.config.js`, so a re-export of a
+different length fails here instead of quietly desynchronising every beat.
 
 > The source render folders are **not in the repository** — 1.2 GB between
 > them, and only ever inputs to this script. Everything the site serves is
@@ -126,7 +135,9 @@ decoded, or Web Audio is missing, the film simply plays silent.
 ## Structure
 
 ```
+brand/monogram.jpg              the supplied RU monogram, on its white card
 scripts/build-frames.mjs        asset pipeline (source PNGs -> WebP + manifest)
+scripts/build-logo.mjs          monogram -> keyed WebP marks + favicons
 src/
   config/
     wedding.config.js           >>> all wedding content <<<
@@ -146,6 +157,34 @@ src/
                                 Couple, Gallery, Rsvp, Footer, primitives
   styles/global.css
 ```
+
+---
+
+## The monogram
+
+`brand/monogram.jpg` is the supplied lockup — the gold RU mark with the names
+under it, flat on a near-white card. `npm run logo` keys that card out to real
+alpha and emits `public/brand/`:
+
+| | |
+|---|---|
+| `mark.webp` | the monogram alone — nav, loader, hero |
+| `logo.webp` | the full lockup, mark plus names |
+| `icon-32.png`, `icon-180.png` | favicon and touch icon, gold on the ink tile |
+
+The site puts this on ivory in the invitation and on near-black behind the
+film, so the white card is keyed out once here rather than fought with blend
+modes at runtime. The key is on *distance from the card colour*, not the usual
+`alpha = 1 - luminance`: that would make the pale highlights running through
+the gold semi-transparent, which then go muddy over the dark backdrop. Keying
+on distance keeps every pixel of the mark at full opacity and true colour and
+only softens the last few levels at the edge.
+
+The mark is cut from the lockup by finding the first run of blank rows beneath
+the monogram rather than at a fixed fraction, so a redrawn logo with different
+proportions still splits in the right place. The nav, loader and hero use the
+mark and not the full lockup, because the names are already set in type on
+those screens and printing them twice reads as a mistake.
 
 ---
 

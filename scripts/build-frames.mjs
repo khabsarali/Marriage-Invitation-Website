@@ -26,11 +26,14 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+// The single source of truth for how long the film is. Importing it means a
+// re-export with a different frame count fails here rather than quietly
+// desynchronising every beat in the scene config.
+import { SOURCE_COUNT as EXPECTED_SOURCE_COUNT } from '../src/config/scenes.config.js'
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT_DIR = path.join(ROOT, 'public', 'frames')
 const STILL_DIR = path.join(ROOT, 'public', 'stills')
-
-const SOURCE_COUNT = 300
 
 /**
  * `width`/`height` are the encoded output size, not the source size.
@@ -40,28 +43,71 @@ const SOURCE_COUNT = 300
  * physical pixels across — 720 is within a hair of that, while 608 or below
  * would visibly upscale. Both variants carry the same pixel count, so the two
  * payloads come out comparable.
+ *
+ * `from` is the source folder. Nothing about the filenames is assumed — see
+ * discover() — so a re-export under different naming needs no code change.
  */
 const VARIANTS = [
-  {
-    key: 'desktop',
-    dir: 'desktop',
-    width: 1280,
-    height: 720,
-    quality: 76,
-    srcPath: (n) => path.join(ROOT, 'DESKTOP FRAMES', `frame 00 (${n}).png`),
-  },
-  {
-    key: 'mobile',
-    dir: 'mobile',
-    width: 720,
-    height: 1280,
-    quality: 70,
-    srcPath: (n) => path.join(ROOT, 'Mobile', `ezgif-frame-${String(n).padStart(3, '0')}.png`),
-  },
+  { key: 'desktop', from: 'DESKTOP FRAMES', dir: 'desktop', width: 1280, height: 720, quality: 76 },
+  { key: 'mobile', from: 'Mobile', dir: 'mobile', width: 720, height: 1280, quality: 70 },
 ]
 
-/** The gallery stills, couple portraits and LQIP are all cut from the desktop plate. */
-const srcPath = VARIANTS[0].srcPath
+const IMAGE_RE = /\.(png|jpe?g|webp|tiff?)$/i
+/**
+ * The last run of digits in the name. That is the frame number in both of the
+ * naming schemes in play — "frame 00 (7).png" and "ezgif-frame-007.png" — and
+ * in most others, because a trailing counter is the near-universal convention.
+ */
+const frameNumber = (name) => {
+  const m = name.match(/(\d+)(?!.*\d)/)
+  return m ? Number(m[1]) : NaN
+}
+
+/**
+ * Read a source folder and return its frames in playback order.
+ *
+ * Order comes from the parsed number, never from readdir order or a string
+ * sort — "frame 00 (10).png" sorts before "frame 00 (9).png" alphabetically,
+ * which would shuffle the film. Gaps and duplicates are reported rather than
+ * silently absorbed.
+ */
+async function discover(folder) {
+  const dir = path.join(ROOT, folder)
+  let entries
+  try {
+    entries = await fs.readdir(dir)
+  } catch {
+    throw new Error(`source folder not found: ${folder}/`)
+  }
+
+  const frames = entries
+    .filter((f) => IMAGE_RE.test(f))
+    .map((file) => ({ file, n: frameNumber(file) }))
+    .filter((f) => Number.isFinite(f.n))
+    .sort((a, b) => a.n - b.n)
+
+  if (!frames.length) throw new Error(`no numbered image files in ${folder}/`)
+
+  const numbers = frames.map((f) => f.n)
+  const dupes = numbers.filter((n, i) => i && n === numbers[i - 1])
+  if (dupes.length) {
+    throw new Error(
+      `${folder}/ has more than one file numbered ${[...new Set(dupes)].slice(0, 5).join(', ')} — ` +
+        `the frame order would be ambiguous.`
+    )
+  }
+
+  const first = numbers[0]
+  const last = numbers[numbers.length - 1]
+  const gaps = last - first + 1 - numbers.length
+  const ext = path.extname(frames[0].file)
+  console.log(
+    `${folder}/: ${frames.length} frames${ext ? ` (${ext})` : ''}, ` +
+      `numbered ${first}..${last}${gaps ? `, ${gaps} missing` : ''}`
+  )
+
+  return frames.map((f) => path.join(dir, f.file))
+}
 
 /** Full-frame stills reused by the gallery (authored in source frame numbers). */
 const STILLS = [
@@ -99,6 +145,34 @@ async function main() {
   }
   await fs.mkdir(STILL_DIR, { recursive: true })
 
+  // ---- pass 0: discover -----------------------------------------------------
+  for (const v of VARIANTS) v.files = await discover(v.from)
+
+  // Every variant is the same film, so they must run the same length. The
+  // config addresses frames by position, which only means anything if they do.
+  const [lead, ...others] = VARIANTS
+  for (const v of others) {
+    if (v.files.length !== lead.files.length) {
+      throw new Error(
+        `${lead.from}/ has ${lead.files.length} frames but ${v.from}/ has ${v.files.length}. ` +
+          `Both are the same film and are addressed by position, so they must match.`
+      )
+    }
+  }
+
+  const SOURCE_COUNT = lead.files.length
+  if (SOURCE_COUNT !== EXPECTED_SOURCE_COUNT) {
+    throw new Error(
+      `the sources carry ${SOURCE_COUNT} frames but scenes.config.js is authored ` +
+        `against ${EXPECTED_SOURCE_COUNT}. Update SOURCE_COUNT and the beat/grade ` +
+        `frame numbers there to match the new footage.`
+    )
+  }
+
+  /** Frames are addressed 1..SOURCE_COUNT by position in the discovered order. */
+  const srcPathFor = (v) => (n) => v.files[n - 1]
+  const srcPath = srcPathFor(lead)
+
   // ---- pass 1: dedupe -------------------------------------------------------
   /** Source frame numbers that survive dropping each exact repeat of its predecessor. */
   const decimate = async (pathFor) => {
@@ -118,7 +192,7 @@ async function main() {
   if (!STILLS_ONLY) {
     const perVariant = []
     for (const v of VARIANTS) {
-      const k = await decimate(v.srcPath)
+      const k = await decimate(srcPathFor(v))
       console.log(`dedupe ${v.key}: ${SOURCE_COUNT} source frames -> ${k.length} unique`)
       perVariant.push({ key: v.key, kept: k })
     }
@@ -155,7 +229,7 @@ async function main() {
     let total = 0
     for (let i = 0; i < kept.length; i++) {
       const out = path.join(OUT_DIR, v.dir, `f${pad(i)}.webp`)
-      await sharp(v.srcPath(kept[i]))
+      await sharp(srcPathFor(v)(kept[i]))
         .resize(v.width, v.height, { fit: 'fill' })
         .webp({ quality: v.quality, effort: 5, smartSubsample: true })
         .toFile(out)
@@ -202,10 +276,7 @@ async function main() {
 
   // ---- manifest -------------------------------------------------------------
   const manifest = {
-    generatedFrom: {
-      desktop: 'DESKTOP FRAMES/frame 00 (N).png',
-      mobile: 'Mobile/ezgif-frame-NNN.png',
-    },
+    generatedFrom: Object.fromEntries(VARIANTS.map((v) => [v.key, `${v.from}/`])),
     sourceCount: SOURCE_COUNT,
     count: kept.length,
     lqip,
