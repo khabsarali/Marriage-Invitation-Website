@@ -315,20 +315,32 @@ async function main() {
   if (STILLS_ONLY) return
 
   // ---- low quality image placeholder (instant first paint) ------------------
-  const lqipBuf = await sharp(srcPath(kept[0]))
-    .resize(32, 18, { fit: 'fill' })
-    .blur(1.4)
-    .webp({ quality: 40 })
-    .toBuffer()
-  const lqip = `data:image/webp;base64,${lqipBuf.toString('base64')}`
+  // One per variant, from that variant's own render. A single shared
+  // placeholder would have meant every phone downloading a thumbnail of the
+  // landscape plate inside the manifest.
+  const lqip = {}
+  for (const v of VARIANTS) {
+    const landscape = v.width >= v.height
+    const w = landscape ? 32 : Math.round(32 * (v.width / v.height))
+    const h = landscape ? Math.round(32 * (v.height / v.width)) : 32
+    const buf = await sharp(srcPathFor(v)(kept[0]))
+      .resize(w, h, { fit: 'fill' })
+      .blur(1.4)
+      .webp({ quality: 40 })
+      .toBuffer()
+    lqip[v.key] = `data:image/webp;base64,${buf.toString('base64')}`
+  }
 
   // ---- manifest -------------------------------------------------------------
   const manifest = {
     generatedFrom: Object.fromEntries(VARIANTS.map((v) => [v.key, `${v.from}/`])),
     sourceCount: SOURCE_COUNT,
     count: kept.length,
-    lqip,
-    /** `aspect` differs per variant — desktop is 16:9, mobile is a 9:16 render. */
+    /**
+     * `aspect` and `lqip` both differ per variant — desktop is a 16:9 render,
+     * mobile a 9:16 one — so neither can live at the top level without one
+     * device carrying a trace of the other's artwork.
+     */
     variants: Object.fromEntries(
       VARIANTS.map((v) => [
         v.key,
@@ -337,6 +349,7 @@ async function main() {
           width: v.width,
           height: v.height,
           aspect: v.width / v.height,
+          lqip: lqip[v.key],
           bytes: bytes[v.key],
         },
       ])
