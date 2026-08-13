@@ -14,7 +14,13 @@ let cached = null
 export async function loadManifest() {
   if (cached) return cached
 
-  const res = await fetch('/frames/manifest.json')
+  // The one file that must never come from cache. Everything else is
+  // content-addressed and safe to keep forever, but those addresses are read
+  // from here — a stale manifest would point a browser at a frame set that has
+  // been replaced, which is exactly the failure this indirection exists to
+  // prevent. `no-cache` still allows a conditional request, so the usual cost
+  // is a 304 on a few kilobytes.
+  const res = await fetch('/frames/manifest.json', { cache: 'no-cache' })
   if (!res.ok) throw new Error(`Could not load the frame manifest (HTTP ${res.status})`)
   cached = await res.json()
   return cached

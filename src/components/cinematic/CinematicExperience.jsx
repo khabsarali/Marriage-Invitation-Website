@@ -57,6 +57,9 @@ export default function CinematicExperience({
   const railFillRef = useRef(null)
 
   const captionBeats = useMemo(() => sceneBeats.filter((b) => b.caption?.title), [])
+  const debugRef = useRef(null)
+  // Vite strips this branch from the production bundle.
+  const showDebug = import.meta.env.DEV
 
   useEffect(() => {
     const section = sectionRef.current
@@ -248,6 +251,15 @@ export default function CinematicExperience({
       setCaptions(sourceFrame)
       setRail(sourceFrame, smooth)
 
+      // Written straight to the DOM from the tick, like the captions, so the
+      // readout costs no React renders. Reports the actual URL the loader is
+      // pulling from, not the profile we asked for.
+      if (debugRef.current) {
+        debugRef.current.textContent =
+          `Renderer: ${profile.toUpperCase()}  ·  Assets: ${variant.path}/  ·  ` +
+          `Frame ${index + 1} / ${variant.count}  ·  source ${Math.round(sourceFrame)} / ${SOURCE_COUNT}`
+      }
+
       if (veilRef.current) {
         const veil = clamp01((smooth - filmSpan - (1 - filmSpan) * 0.18) / ((1 - filmSpan) * 0.62))
         veilRef.current.style.opacity = (veil * veil * (3 - 2 * veil)).toFixed(3)
@@ -359,6 +371,10 @@ export default function CinematicExperience({
         <button type="button" className="cinematic__skip" onClick={skip}>
           Skip to the invitation
         </button>
+
+        {showDebug && (
+          <output className="cinematic__debug" ref={debugRef} aria-hidden="true" />
+        )}
 
         <div className="cinematic__veil" ref={veilRef} aria-hidden="true" />
       </div>

@@ -1,4 +1,5 @@
 import { useReveal } from '../../lib/hooks.js'
+import { stillsVersion } from '../../config/stills.generated.js'
 
 /** Fades and lifts its children the first time they enter the viewport. */
 export function Reveal({ as: Tag = 'div', className = '', delay = 0, children, ...rest }) {
@@ -73,15 +74,21 @@ export function Section({ id, className = '', children, label }) {
  * stills and the film always agree about which render a device is on.
  */
 export function Still({ src, alt, className, width, height, ...rest }) {
+  // One version for the whole still set, regenerated only when a still's bytes
+  // change. These filenames are readable and referenced from the config, so
+  // they cannot carry the hash in the path the way the film frames do — but an
+  // unversioned URL whose content changes is exactly how a stale image survives
+  // a redeploy, which is what happened to the frames.
+  const v = `?v=${stillsVersion}`
   return (
     <picture>
       <source
         media="(max-width: 768px)"
-        srcSet={src.replace('/stills/', '/stills/mobile/')}
+        srcSet={src.replace('/stills/', '/stills/mobile/') + v}
         type="image/webp"
       />
       <img
-        src={src}
+        src={src + v}
         alt={alt}
         className={className}
         width={width}

@@ -17,38 +17,43 @@ export function useMediaQuery(query) {
   return matches
 }
 
+/** The one breakpoint in the project. 768 and under is the portrait film. */
+export const MOBILE_BREAKPOINT = 768
+const MOBILE_QUERY = `(max-width: ${MOBILE_BREAKPOINT}px)`
+
 /**
- * Which asset set to serve — the portrait render or the landscape one.
- * Decided once on mount and deliberately not re-evaluated on resize, because
- * swapping the frame set mid-film would throw away everything already
- * downloaded. That is also why this cannot be a CSS media query.
+ * Which render to serve — the 9:16 portrait one or the 16:9 landscape one.
  *
- * Size alone is not enough to identify a phone. The test is against the
- * viewport, and browser chrome costs about 110px of height, so a 1366x768
- * laptop reports 1366x657 and a 1440x900 MacBook reports 1440x790 — both under
- * any sensible small-side threshold, and both were being served the portrait
- * film. Requiring a coarse, hoverless pointer settles it: that is true of
- * phones and tablets, false of every laptop, and true under device emulation
- * in devtools.
+ * Width alone, through matchMedia. Earlier revisions also weighed pointer type
+ * and the smaller side of the viewport, which went wrong in both directions:
+ * a `min(width, height)` test caught laptops, because browser chrome drops a
+ * 1366x768 laptop to 1366x657, and a pointer test then missed a desktop window
+ * dragged narrow. A single width rule is what the breakpoint actually means
+ * and is what devtools emulation reproduces.
  *
- * Size still decides among touch devices, so a large tablet keeps the
- * landscape film while a phone gets the portrait one, in either orientation.
+ * It follows the breakpoint live rather than sampling once on mount, so
+ * dragging a window across 768 switches renders. `change` only fires when the
+ * query flips, so a phone collapsing its address bar — which moves height, not
+ * width — never triggers a reload of the sequence.
  *
- * A narrow window counts as mobile whatever it is pointed at, which is the
- * plain max-width:768px reading and makes a resized desktop browser behave the
- * way anyone testing responsiveness expects. That test is on width alone, not
- * on the smaller side: laptop viewports are at least 1024 wide, so it cannot
- * catch one the way a min(width, height) test did.
+ * The tradeoff is that a phone turned landscape is over 768 wide and takes the
+ * landscape film. That suits the shape of the screen it is now, and it is the
+ * literal meaning of the breakpoint.
  */
 export function useDeviceProfile() {
-  return useMemo(() => {
-    if (typeof window === 'undefined') return { isMobile: false, isTouch: false }
-    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches
-    const isNarrow = window.innerWidth <= 768
-    const isSmall = Math.min(window.innerWidth, window.innerHeight) <= 820
-    const lowMemory = (navigator.deviceMemory ?? 8) <= 4
-    return { isMobile: isNarrow || (isTouch && (isSmall || lowMemory)), isTouch }
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window === 'undefined' ? false : window.matchMedia(MOBILE_QUERY).matches
+  )
+
+  useEffect(() => {
+    const mql = window.matchMedia(MOBILE_QUERY)
+    const onChange = (event) => setIsMobile(event.matches)
+    setIsMobile(mql.matches)
+    mql.addEventListener('change', onChange)
+    return () => mql.removeEventListener('change', onChange)
   }, [])
+
+  return { isMobile }
 }
 
 export function usePrefersReducedMotion() {

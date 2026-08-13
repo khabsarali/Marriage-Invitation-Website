@@ -131,10 +131,21 @@ export default function App() {
       }
     }
 
+    // Crossing the breakpoint means a different render entirely, so the old
+    // one is dropped before the new one primes: clearing `variant` unmounts
+    // CinematicExperience, which disposes its WebGL stage and ticker, and the
+    // cleanup below destroys the sequence that was feeding it. On first mount
+    // these are already the initial values, so nothing extra happens.
+    setVariant(null)
+    setSequence(null)
+    setProgress(0)
+    setPhase('loading')
+
     boot()
     return () => {
       cancelled = true
       sequenceRef.current?.destroy()
+      sequenceRef.current = null
     }
   }, [isMobile])
 
