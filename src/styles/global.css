@@ -75,6 +75,13 @@ canvas {
   max-width: 100%;
 }
 
+/* <picture> exists only so the browser can choose a source; it must not put a
+   box in the way, or the `width/height: 100%` on the image inside would be
+   resolving against an inline wrapper instead of the fixed-ratio frame. */
+picture {
+  display: contents;
+}
+
 h1,
 h2,
 h3 {

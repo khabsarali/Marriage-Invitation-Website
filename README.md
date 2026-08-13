@@ -53,6 +53,7 @@ the site serves. It is the only place the source PNGs are touched.
 | `public/frames/desktop` | 240 × WebP 1280×720 — **15.9 MB** |
 | `public/frames/mobile` | 240 × WebP 720×1280 — **16.5 MB** |
 | `public/stills` | 8 gallery frames + 2 portrait crops, cut from the desktop plate |
+| `public/stills/mobile` | the same ten, cut from the portrait plate instead |
 
 It also writes `public/frames/manifest.json` (which maps the original frame
 numbers onto output indices, so the scene config stays readable) and
@@ -232,6 +233,22 @@ shown, letterboxed into its own blurred fill — and it opens up once the two of
 them are safely inboard, which reads as a slow push-in as they come together.
 How much punch-in a screen needs is computed per device, so a 9:16 handset uses
 none of it and the tallest Android uses all of it.
+
+**The stills too.** The film was never the only place a frame reached the page:
+the gallery tiles, the event cards and the couple portraits are stills cut from
+the render, and those were all cut from the landscape plate — so a phone that
+correctly played the portrait film still scrolled into a screenful of desktop
+frames. They are now cut from both plates, and `Still` in `primitives.jsx`
+serves them through a `<picture>` whose `<source media>` matches the loader's
+breakpoint, so the browser fetches exactly one set.
+
+The mobile cuts stay 16:9 rather than becoming portrait images. The gallery
+tiles and event cards are fixed `aspect-ratio: 16 / 9` boxes with
+`object-fit: cover`, so a 9:16 source would be cover-cropped to a narrow middle
+band with the heads cut off; taking a 16:9 band out of the portrait plate keeps
+every layout rule untouched. Because that plate frames the couple far tighter,
+the band lands as a head-and-shoulders shot — a better thumbnail than the wide
+master it replaces.
 
 (An earlier `MOBILE FRAMES/` folder held a byte-for-byte copy of
 `DESKTOP FRAMES/` rather than any portrait artwork. It has been deleted.)

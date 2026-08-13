@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Section, SectionHeading, Reveal } from './primitives.jsx'
+import { Section, SectionHeading, Reveal, Still } from './primitives.jsx'
 import { gallery } from '../../config/wedding.config.js'
 import { stills } from '../../config/stills.generated.js'
 
@@ -49,14 +49,7 @@ export default function Gallery() {
             delay={(i % 4) * 80}
             onClick={() => setOpen(i)}
           >
-            <img
-              src={still.src}
-              alt={still.caption}
-              loading="lazy"
-              decoding="async"
-              width="1280"
-              height="720"
-            />
+            <Still src={still.src} alt={still.caption} width="1280" height="720" />
             <span className="gallery__caption">{still.caption}</span>
           </Reveal>
         ))}
@@ -66,7 +59,7 @@ export default function Gallery() {
         <div className="lightbox" role="dialog" aria-modal="true" aria-label={stills[open].caption}>
           <button type="button" className="lightbox__backdrop" onClick={close} aria-label="Close" />
           <figure className="lightbox__figure">
-            <img src={stills[open].src} alt={stills[open].caption} width="1280" height="720" />
+            <Still src={stills[open].src} alt={stills[open].caption} width="1280" height="720" />
             <figcaption>{stills[open].caption}</figcaption>
           </figure>
           <button type="button" className="lightbox__nav lightbox__nav--prev" onClick={() => step(-1)} aria-label="Previous">

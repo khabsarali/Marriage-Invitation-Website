@@ -34,6 +34,7 @@ import { SOURCE_COUNT as EXPECTED_SOURCE_COUNT } from '../src/config/scenes.conf
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT_DIR = path.join(ROOT, 'public', 'frames')
 const STILL_DIR = path.join(ROOT, 'public', 'stills')
+const MOBILE_STILL_DIR = path.join(STILL_DIR, 'mobile')
 
 /**
  * `width`/`height` are the encoded output size, not the source size.
@@ -130,6 +131,30 @@ const STILLS = [
 const PORTRAITS = [
   { name: 'groom', frame: 206, left: 320, top: 0, width: 336, height: 420 },
   { name: 'bride', frame: 206, left: 616, top: 0, width: 336, height: 420 },
+]
+
+/**
+ * The same stills again, cut from the portrait render for phones, so nothing
+ * on a phone is ever a crop of the landscape plate.
+ *
+ * These stay 16:9 rather than becoming portrait images. The gallery tiles and
+ * event cards are fixed `aspect-ratio: 16 / 9` boxes with `object-fit: cover`;
+ * feeding them a 9:16 source would cover-crop it to a narrow middle band and
+ * cut the heads off. Cutting a 16:9 band out of the portrait plate instead
+ * keeps every existing layout rule untouched, and because that plate frames
+ * the couple far tighter than the landscape one, the band lands as a
+ * head-and-shoulders shot — a better thumbnail than the wide master.
+ *
+ * 1080 x 608 is 16:9 out of the 1080x1920 plate; top 300 puts the cut just
+ * under the ceiling so both faces sit inside it.
+ */
+const MOBILE_BAND = { left: 0, top: 300, width: 1080, height: 608 }
+
+/** 4:5 boxes measured against the portrait plate at frame 206, where the
+ *  groom spans x 12-48% and the bride x 52-88%, heads at y 19-21%. */
+const MOBILE_PORTRAITS = [
+  { name: 'groom', frame: 206, left: 90, top: 330, width: 460, height: 575 },
+  { name: 'bride', frame: 206, left: 545, top: 350, width: 460, height: 575 },
 ]
 
 const sha1 = (buf) => createHash('sha1').update(buf).digest('hex')
@@ -253,6 +278,29 @@ async function main() {
       .resize(672, 840, { fit: 'fill' })
       .webp({ quality: 84, effort: 6 })
       .toFile(path.join(STILL_DIR, `${p.name}.webp`))
+  }
+
+  // The same stills cut from the portrait render, so a phone is never shown a
+  // frame from the landscape one. See MOBILE_BAND for why these stay 16:9.
+  const mobileVariant = VARIANTS.find((v) => v.key === 'mobile')
+  if (mobileVariant) {
+    const mobileSrc = srcPathFor(mobileVariant)
+    await fs.mkdir(MOBILE_STILL_DIR, { recursive: true })
+    for (const s of STILLS) {
+      await sharp(mobileSrc(s.frame))
+        .extract(MOBILE_BAND)
+        .resize(1024, 576, { fit: 'fill' })
+        .webp({ quality: 80, effort: 6 })
+        .toFile(path.join(MOBILE_STILL_DIR, `${s.name}.webp`))
+    }
+    for (const p of MOBILE_PORTRAITS) {
+      await sharp(mobileSrc(p.frame))
+        .extract({ left: p.left, top: p.top, width: p.width, height: p.height })
+        .resize(672, 840, { fit: 'fill' })
+        .webp({ quality: 84, effort: 6 })
+        .toFile(path.join(MOBILE_STILL_DIR, `${p.name}.webp`))
+    }
+    console.log(`mobile stills: ${STILLS.length} gallery + ${MOBILE_PORTRAITS.length} portraits`)
   }
   await fs.writeFile(
     path.join(ROOT, 'src', 'config', 'stills.generated.js'),

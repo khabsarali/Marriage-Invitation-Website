@@ -60,3 +60,36 @@ export function Section({ id, className = '', children, label }) {
     </section>
   )
 }
+
+/**
+ * A still lifted from the film.
+ *
+ * Phones are served the cut from the portrait render and everything else the
+ * cut from the landscape one. The browser resolves <source media> before it
+ * fetches anything, so exactly one of the two is downloaded — a phone never
+ * requests, let alone shows, a frame from the desktop plate.
+ *
+ * The breakpoint matches the one the frame loader uses in hooks.js, so the
+ * stills and the film always agree about which render a device is on.
+ */
+export function Still({ src, alt, className, width, height, ...rest }) {
+  return (
+    <picture>
+      <source
+        media="(max-width: 768px)"
+        srcSet={src.replace('/stills/', '/stills/mobile/')}
+        type="image/webp"
+      />
+      <img
+        src={src}
+        alt={alt}
+        className={className}
+        width={width}
+        height={height}
+        loading="lazy"
+        decoding="async"
+        {...rest}
+      />
+    </picture>
+  )
+}
