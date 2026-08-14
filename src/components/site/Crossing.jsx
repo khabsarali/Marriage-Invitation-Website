@@ -68,10 +68,12 @@ export default function Crossing({ reducedMotion }) {
           ))}
         </div>
 
-        <Reveal className="crossing__foot" delay={220}>
-          <Rule tight />
-          <p className="crossing__note">{celebrations.note}</p>
-        </Reveal>
+        {celebrations.note && (
+          <Reveal className="crossing__foot" delay={220}>
+            <Rule tight />
+            <p className="crossing__note">{celebrations.note}</p>
+          </Reveal>
+        )}
       </div>
     </section>
   )

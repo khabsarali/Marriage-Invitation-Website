@@ -116,7 +116,11 @@ export const celebrations = {
    * than being left to whatever width the browser happens to have.
    */
   headingLines: ['When Dubai', 'Meets Karachi'],
-  note: 'One celebration, across two cities and two years',
+  /**
+   * The closing line under the two panels. null and the rule goes with it —
+   * the two cities and their dates say it without being told.
+   */
+  note: null,
 }
 
 /* --------------------------------------------------------------------------
