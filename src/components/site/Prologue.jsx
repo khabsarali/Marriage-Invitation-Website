@@ -1,12 +1,11 @@
 import { Reveal } from './primitives.jsx'
-import CityPlate from './CityPlate.jsx'
 import { announcement, cities, couple, coupleNames, invitation, logo, prologue } from '../../config/wedding.config.js'
 import { ENABLE_3D_EXPERIENCE } from '../../config/scenes.config.js'
 
 /**
  * Everything before the film.
  *
- *   the three opening lines  ->  Dubai  ->  the crossing  ->  Karachi
+ *   the three opening lines  ->  the two cities and their dates
  *   ->  the announcement  ->  the couple  ->  the cue into the film
  *
  * Deliberately built from the same `Reveal` the invitation already uses, so the
@@ -47,26 +46,28 @@ export default function Prologue({ reducedMotion }) {
         </Reveal>
       </section>
 
-      {/* ------------------------------------------------------------ Dubai */}
-      <CityPlate city={dubai} reducedMotion={reducedMotion} eyebrow="The celebrations begin in" />
-
-      {/* -------------------------------------------- Dubai -> Karachi ---- */}
-      {/* The crossing between the two cities. A held line over a slow wash,
-          so the move reads as one journey rather than two separate sections. */}
-      <section className="crossing" aria-label="From Dubai to Karachi">
+      {/* ------------------------------------------- the two cities, briefly */}
+      {/* The full-height Dubai and Karachi plates are gone. They were the only
+          place the date ranges appeared, so the dates moved here rather than
+          off the site — one band carrying both cities and both ranges. */}
+      <section className="crossing" aria-label="Dubai and Karachi">
         <div className="crossing__wash" aria-hidden="true" />
-        <Reveal as="p" className="crossing__line">
-          <span>Dubai</span>
-          <span className="crossing__arrow" aria-hidden="true" />
-          <span>Karachi</span>
-        </Reveal>
-        <Reveal as="p" className="crossing__note" delay={220}>
+
+        <div className="crossing__cities">
+          {[dubai, karachi].map((city, i) => (
+            <Reveal as="p" className="crossing__city" key={city.id} delay={i * 220}>
+              <span className="crossing__cityname">{city.name}</span>
+              <span className="crossing__citydates">
+                {city.dates} {city.month} <span>{city.year}</span>
+              </span>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal as="p" className="crossing__note" delay={460}>
           One celebration, across two cities and two years
         </Reveal>
       </section>
-
-      {/* ---------------------------------------------------------- Karachi */}
-      <CityPlate city={karachi} reducedMotion={reducedMotion} eyebrow="And continue in" />
 
       {/* ----------------------------------------------------- announcement */}
       <section className="announce" aria-label="The announcement">

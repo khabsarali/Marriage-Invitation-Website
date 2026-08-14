@@ -2165,3 +2165,34 @@ html.lenis body {
     transform: rotate(135deg);
   }
 }
+
+/* The two cities as one band, after the full-height plates were removed. */
+.crossing__cities {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: clamp(2rem, 9vw, 6rem);
+  flex-wrap: wrap;
+}
+.crossing__city {
+  display: grid;
+  gap: 0.6rem;
+}
+.crossing__cityname {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(1.9rem, 1.1rem + 3.4vw, 3.4rem);
+  line-height: 1;
+  color: #fff;
+  letter-spacing: 0.03em;
+}
+.crossing__citydates {
+  font-size: clamp(0.66rem, 0.62rem + 0.3vw, 0.8rem);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(248, 243, 234, 0.72);
+}
+.crossing__citydates span {
+  color: var(--gold-light);
+}
