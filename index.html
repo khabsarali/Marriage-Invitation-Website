@@ -29,7 +29,11 @@
       rel="stylesheet"
     />
 
-    <link rel="preload" as="fetch" href="/frames/manifest.json" crossorigin />
+    <!-- Preload for the film manifest. Commented out while
+         ENABLE_3D_EXPERIENCE is false in src/config/scenes.config.js: a
+         static preload ignores the flag and would fetch a 3D asset on every
+         visit. Restore it when the film comes back.
+    <link rel="preload" as="fetch" href="/frames/manifest.json" crossorigin /> -->
   </head>
   <body>
     <div id="root"></div>

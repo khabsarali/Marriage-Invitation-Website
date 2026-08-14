@@ -11,6 +11,19 @@
    the renderer where they are so it can grade, bloom and blur along with them.
    ========================================================================== */
 
+/* ==========================================================================
+   THE ONE SWITCH.
+
+   false hides the scroll-driven film everywhere, at every viewport width.
+   Nothing is deleted: the renderer, both frame loaders, the frame maps, the
+   scene beats, the grading and both asset sets all stay exactly as they are.
+   They are simply never mounted, so no frame is requested, no canvas exists
+   and ScrollTrigger never pins anything.
+
+   Set it back to true and the film returns with no other change.
+   ========================================================================== */
+export const ENABLE_3D_EXPERIENCE = false
+
 export const SOURCE_COUNT = 300
 
 /** Story beats. `kind: 'transition'` marks the light-wipe crossovers. */

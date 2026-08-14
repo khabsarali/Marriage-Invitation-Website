@@ -1,6 +1,7 @@
 import { Reveal } from './primitives.jsx'
 import CityPlate from './CityPlate.jsx'
 import { announcement, cities, couple, coupleNames, invitation, logo, prologue } from '../../config/wedding.config.js'
+import { ENABLE_3D_EXPERIENCE } from '../../config/scenes.config.js'
 
 /**
  * Everything before the film.
@@ -97,11 +98,17 @@ export default function Prologue({ reducedMotion }) {
       </section>
 
       {/* --------------------------------------------------- into the film */}
-      <section className="filmcue" aria-hidden="true">
-        <Reveal as="p" className="filmcue__line">
-          {prologue.filmCue}
-        </Reveal>
-      </section>
+      {/* This section exists to hand over to the film, and it fades the ivory
+          ground down to the film's black to do it. With the film off there is
+          nothing to hand over to, and the gradient would read as a black band
+          across the page — so it goes with the film. */}
+      {ENABLE_3D_EXPERIENCE && (
+        <section className="filmcue" aria-hidden="true">
+          <Reveal as="p" className="filmcue__line">
+            {prologue.filmCue}
+          </Reveal>
+        </section>
+      )}
     </div>
   )
 }

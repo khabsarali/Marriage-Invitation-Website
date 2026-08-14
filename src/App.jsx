@@ -1,10 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
 import Lenis from 'lenis'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 import StoryLoader from './components/loader/StoryLoader.jsx'
-import CinematicExperience from './components/cinematic/CinematicExperience.jsx'
+
+/**
+ * Loaded on demand, so the film's dependencies — three.js above all, ~116 kB
+ * gzipped — are only fetched when the film is actually going to be shown. A
+ * static import would put them in the first bundle and download them even with
+ * ENABLE_3D_EXPERIENCE off. The component itself is untouched.
+ */
+const CinematicExperience = lazy(() => import('./components/cinematic/CinematicExperience.jsx'))
 import Nav from './components/site/Nav.jsx'
 import Prologue from './components/site/Prologue.jsx'
 import Hero from './components/site/Hero.jsx'
@@ -12,7 +19,6 @@ import Countdown from './components/site/Countdown.jsx'
 import Events from './components/site/Events.jsx'
 import Venue from './components/site/Venue.jsx'
 import Couple from './components/site/Couple.jsx'
-import Gallery from './components/site/Gallery.jsx'
 import Rsvp from './components/site/Rsvp.jsx'
 import Footer from './components/site/Footer.jsx'
 
@@ -20,7 +26,7 @@ import { FrameSequence } from './lib/FrameSequence.js'
 import { FilmAudio } from './lib/FilmAudio.js'
 import { loadManifest, resolveVariant } from './lib/manifest.js'
 import { useDeviceProfile, usePrefersReducedMotion } from './lib/hooks.js'
-import { loading, sound } from './config/scenes.config.js'
+import { ENABLE_3D_EXPERIENCE, loading, sound } from './config/scenes.config.js'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -77,9 +83,12 @@ export default function App() {
   const [variant, setVariant] = useState(null)
   const [sequence, setSequence] = useState(null)
   const [progress, setProgress] = useState(0)
-  const [phase, setPhase] = useState('loading') // loading | leaving | ready | filmless
-  const [filmDone, setFilmDone] = useState(false)
-  const [filmActive, setFilmActive] = useState(true)
+  // With the film off the page opens straight into the invitation: 'filmless'
+  // means no loader, no scroll lock and no pinned stage, and the nav is free to
+  // show immediately because there is no film for it to get out of the way of.
+  const [phase, setPhase] = useState(ENABLE_3D_EXPERIENCE ? 'loading' : 'filmless')
+  const [filmDone, setFilmDone] = useState(!ENABLE_3D_EXPERIENCE)
+  const [filmActive, setFilmActive] = useState(ENABLE_3D_EXPERIENCE)
   const [muted, setMuted] = useState(readMuted)
   // Whether the score has actually been unlocked by a gesture and decoded, as
   // opposed to merely being wanted — the toggle must not claim to be playing
@@ -91,6 +100,11 @@ export default function App() {
   /* ------------------------------------------------------------- load film */
 
   useEffect(() => {
+    // Returning before boot() is what keeps the frames off the wire: the
+    // manifest is never fetched, so no FrameSequence is built and nothing is
+    // downloaded from either asset set.
+    if (!ENABLE_3D_EXPERIENCE) return
+
     let cancelled = false
 
     const boot = async () => {
@@ -155,7 +169,9 @@ export default function App() {
   const showFilm = phase === 'ready' || phase === 'leaving'
 
   useEffect(() => {
-    if (!sound.enabled || !FilmAudio.supported) return
+    // The score plays under the film and nowhere else, so with the film off it
+    // is not merely silent — it is never armed, and the track is never fetched.
+    if (!ENABLE_3D_EXPERIENCE || !sound.enabled || !FilmAudio.supported) return
 
     const audio = new FilmAudio(sound)
     audioRef.current = audio
@@ -289,14 +305,18 @@ export default function App() {
         <Prologue reducedMotion={reducedMotion} />
 
         {showFilm && sequence && variant && (
-          <CinematicExperience
-            variant={variant}
-            sequence={sequence}
-            isMobile={isMobile}
-            reducedMotion={reducedMotion}
-            onFinish={onFilmFinish}
-            onActiveChange={setFilmActive}
-          />
+          /* No fallback: the loader is still on screen at this point, and the
+             chunk arrives alongside frames that are already primed. */
+          <Suspense fallback={null}>
+            <CinematicExperience
+              variant={variant}
+              sequence={sequence}
+              isMobile={isMobile}
+              reducedMotion={reducedMotion}
+              onFinish={onFilmFinish}
+              onActiveChange={setFilmActive}
+            />
+          </Suspense>
         )}
 
         <div className="invitation">
@@ -305,7 +325,6 @@ export default function App() {
           <Events />
           <Venue />
           <Couple />
-          <Gallery />
           <Rsvp />
           <Footer />
         </div>

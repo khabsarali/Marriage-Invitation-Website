@@ -1,4 +1,4 @@
-import { Section, SectionHeading, Reveal, Still } from './primitives.jsx'
+import { Section, SectionHeading, Reveal } from './primitives.jsx'
 import { couple } from '../../config/wedding.config.js'
 
 const ROLES = { bride: 'The Bride', groom: 'The Groom' }
@@ -7,9 +7,18 @@ function Portrait({ personKey, index }) {
   const person = couple[personKey]
   return (
     <Reveal as="article" className="person" delay={index * 140}>
-      <div className="person__frame">
-        <Still src={person.image} alt={person.fullName} width="672" height="840" />
-      </div>
+      {person.image && (
+        <div className="person__frame">
+          <img
+            src={person.image}
+            alt={person.fullName}
+            width="672"
+            height="840"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+      )}
       <p className="person__role">{ROLES[personKey]}</p>
       <h3 className="person__name">{person.fullName}</h3>
       {person.parents && <p className="person__parents">{person.parents}</p>}

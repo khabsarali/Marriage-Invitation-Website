@@ -15,14 +15,16 @@ export const couple = {
     /** Shown in the couple section. null hides the line. */
     parents: null,
     words: null,
-    image: '/stills/bride.webp',
+    image: '/portraits/radia.webp',
   },
   groom: {
     name: 'Umar',
     fullName: 'Umar',
     parents: null,
     words: null,
-    image: '/stills/groom.webp',
+    // No photograph supplied yet. The card is omitted rather than filled
+    // with a frame from the film.
+    image: null,
   },
   /** Order the names appear as — matches the RU monogram. */
   order: ['bride', 'groom'],
@@ -126,7 +128,7 @@ export const events = [
     address: null,
     mapQuery: null,
     dress: null,
-    image: '/stills/mehndi-together.webp',
+    image: null,
   },
   {
     id: 'barat',
@@ -141,7 +143,7 @@ export const events = [
     address: null,
     mapQuery: null,
     dress: null,
-    image: '/stills/barat-couple.webp',
+    image: null,
   },
   {
     id: 'walima',
@@ -156,7 +158,7 @@ export const events = [
     address: null,
     mapQuery: null,
     dress: null,
-    image: '/stills/walima-couple.webp',
+    image: null,
   },
 ]
 

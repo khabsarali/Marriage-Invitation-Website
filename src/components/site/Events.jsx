@@ -1,4 +1,4 @@
-import { Section, SectionHeading, Reveal, Still } from './primitives.jsx'
+import { Section, SectionHeading, Reveal } from './primitives.jsx'
 import { events, mapsUrl, tbc } from '../../config/wedding.config.js'
 
 /**
@@ -19,10 +19,7 @@ function Fact({ label, children, value }) {
 function EventCard({ event, index }) {
   return (
     <Reveal as="article" className="event" delay={index * 110}>
-      <div className="event__media">
-        <Still src={event.image} alt={`${event.name} — from the wedding film`} width="1280" height="720" />
-        <span className="event__badge">{event.name}</span>
-      </div>
+      <p className="event__badge event__badge--plain">{event.name}</p>
 
       <div className="event__body">
         <p className="event__tagline">{event.tagline}</p>
