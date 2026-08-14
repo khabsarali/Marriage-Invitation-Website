@@ -1,59 +1,116 @@
 /* ==========================================================================
    WEDDING CONFIGURATION — this is the only file you need to edit.
-   Every name, date, time, venue, phone number and link on the site is read
-   from here. Nothing below is hardcoded anywhere else in the codebase.
+   Every name, date, time, venue and link on the site is read from here.
+   Nothing below is hardcoded anywhere else in the codebase.
 
-   >>> The values shipped here are PLACEHOLDERS. Replace them with the real
-   >>> wedding details before publishing.
+   Anything not yet supplied is left as `null` rather than guessed. The
+   components render "Details to follow" in its place, so a placeholder can
+   never be mistaken for a real date or address.
    ========================================================================== */
 
 export const couple = {
   bride: {
     name: 'Radia',
-    // No surname supplied yet — add it here and it flows to the couple section.
     fullName: 'Radia',
-    // Shown in the couple section.
-    parents: 'Daughter of Mr. & Mrs. [family name]',
-    words: 'A quiet reader, a loud laugher, and the calm at the centre of every room she walks into.',
+    /** Shown in the couple section. null hides the line. */
+    parents: null,
+    words: null,
     image: '/stills/bride.webp',
   },
   groom: {
     name: 'Umar',
     fullName: 'Umar',
-    parents: 'Son of Mr. & Mrs. [family name]',
-    words: 'An early riser, a hopeless romantic, and the one who has been counting down since the day she said yes.',
+    parents: null,
+    words: null,
     image: '/stills/groom.webp',
   },
-  /** Order the names appear as, e.g. "Radia & Umar" — matches the monogram. */
+  /** Order the names appear as — matches the RU monogram. */
   order: ['bride', 'groom'],
-  hashtag: '#RadiaWedsUmar',
+  /** The word set between the two names in the couple reveal. */
+  joiner: 'with',
+  hashtag: null,
+}
+
+/* --------------------------------------------------------------------------
+   The cinematic opening, before the film. Each line lands on its own.
+   -------------------------------------------------------------------------- */
+export const prologue = {
+  lines: ['A Royal Celebration of Love', 'A Date With Destiny', 'When Dubai Meets Karachi'],
+  /** Shown as the film takes over. */
+  filmCue: 'And so, their celebration begins…',
+}
+
+/* --------------------------------------------------------------------------
+   The two cities the celebration spans.
+
+   `image` is a path under public/. Leave it null and the section renders its
+   own composed plate instead, so the layout, parallax and type are already
+   final — dropping a photograph in later needs no code change.
+   -------------------------------------------------------------------------- */
+export const cities = [
+  {
+    id: 'dubai',
+    name: 'Dubai',
+    dates: '16th – 27th',
+    month: 'December',
+    year: '2026',
+    /** Read by the countdown and by <time> elements. */
+    startISO: '2026-12-16T00:00:00+04:00',
+    image: null, // e.g. '/city/dubai.webp'
+    imageAlt: 'Dubai at dusk',
+    /** Drives the placeholder plate's palette until a photograph replaces it. */
+    tone: ['#1c1a24', '#3a3140', '#c9a45f'],
+  },
+  {
+    id: 'karachi',
+    name: 'Karachi',
+    dates: '6th – 8th',
+    month: 'January',
+    year: '2027',
+    startISO: '2027-01-06T00:00:00+05:00',
+    image: null, // e.g. '/city/karachi.webp'
+    imageAlt: 'The Karachi coastline at sunset',
+    tone: ['#1b1f22', '#33403f', '#d9bd85'],
+  },
+]
+
+/* --------------------------------------------------------------------------
+   The announcement itself.
+   -------------------------------------------------------------------------- */
+export const announcement = {
+  hosts: 'Younus Abdul Karim & Makia Younus',
+  lead: 'Joyfully announce the',
+  heading: 'Wedding Celebrations',
+  relation: 'Of their beloved grand daughter',
 }
 
 export const invitation = {
+  blessing: 'بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ',
   kicker: 'Together with their families',
   request: 'request the pleasure of your presence at the celebration of their wedding',
-  blessing: 'بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ',
   verse:
     '“And among His signs is that He created for you mates from among yourselves, that you may dwell in tranquillity with them, and He has put love and mercy between your hearts.”',
   verseSource: 'Surah Ar-Rum, 30:21',
 }
 
 /* --------------------------------------------------------------------------
-   The date the countdown counts down to — the main wedding day (Barat).
-   Format: ISO 8601 with the timezone offset, so it is correct for guests
-   in every country. +05:00 is Pakistan Standard Time.
+   The countdown counts to the first day of the celebrations, in Dubai.
+   Format: ISO 8601 with the timezone offset, so it is correct everywhere.
    -------------------------------------------------------------------------- */
 export const weddingDate = {
-  iso: '2026-11-14T19:00:00+05:00',
-  weekday: 'Saturday',
-  day: '14',
-  month: 'November',
+  iso: cities[0].startISO,
+  weekday: 'Wednesday',
+  day: '16',
+  month: 'December',
   year: '2026',
+  /** Shown under the countdown. */
+  note: 'Dubai, and then Karachi in the new year.',
 }
 
 /* --------------------------------------------------------------------------
-   Events. `scene` links the card to its chapter of the cinematic film, which
-   supplies the card's still image and accent colour.
+   Events. `scene` links a card to its chapter of the film, which supplies the
+   card's still image. Dates, times and venues are not yet settled — they stay
+   null until supplied, and are never invented.
    -------------------------------------------------------------------------- */
 export const events = [
   {
@@ -61,14 +118,14 @@ export const events = [
     scene: 'mehndi',
     name: 'Mehndi',
     tagline: 'An evening of henna, dhol and marigolds',
-    weekday: 'Friday',
-    date: '13 November 2026',
-    dateISO: '2026-11-13T19:30:00+05:00',
-    time: '7:30 PM onwards',
-    venue: 'Bagh-e-Jinnah Lawn',
-    address: 'Lawrence Road, Lahore, Punjab 54000, Pakistan',
-    mapQuery: 'Bagh-e-Jinnah, Lawrence Road, Lahore',
-    dress: 'Yellows, greens & florals',
+    city: null,
+    date: null,
+    dateISO: null,
+    time: null,
+    venue: null,
+    address: null,
+    mapQuery: null,
+    dress: null,
     image: '/stills/mehndi-together.webp',
   },
   {
@@ -76,14 +133,14 @@ export const events = [
     scene: 'barat',
     name: 'Barat',
     tagline: 'The wedding ceremony & nikkah dinner',
-    weekday: 'Saturday',
-    date: '14 November 2026',
-    dateISO: '2026-11-14T19:00:00+05:00',
-    time: '7:00 PM onwards',
-    venue: 'Royal Palm Grand Hall',
-    address: '52 Canal Bank Road, Lahore, Punjab 54600, Pakistan',
-    mapQuery: 'Royal Palm Golf & Country Club, Canal Bank Road, Lahore',
-    dress: 'Formal traditional',
+    city: null,
+    date: null,
+    dateISO: null,
+    time: null,
+    venue: null,
+    address: null,
+    mapQuery: null,
+    dress: null,
     image: '/stills/barat-couple.webp',
   },
   {
@@ -91,23 +148,22 @@ export const events = [
     scene: 'walima',
     name: 'Walima',
     tagline: 'A reception hosted by the groom’s family',
-    weekday: 'Sunday',
-    date: '15 November 2026',
-    dateISO: '2026-11-15T19:00:00+05:00',
-    time: '7:00 PM onwards',
-    venue: 'The Grand Ballroom, Pearl Continental',
-    address: 'Shahrah-e-Quaid-e-Azam, Lahore, Punjab 54000, Pakistan',
-    mapQuery: 'Pearl Continental Hotel Lahore',
-    dress: 'Formal',
+    city: null,
+    date: null,
+    dateISO: null,
+    time: null,
+    venue: null,
+    address: null,
+    mapQuery: null,
+    dress: null,
     image: '/stills/walima-couple.webp',
   },
 ]
 
-/** The venue given its own section — normally the main wedding day. */
-export const primaryVenue = {
-  eventId: 'barat',
-  heading: 'The Wedding Venue',
-  note: 'Valet parking is available at the main gate. The hall opens an hour before the ceremony begins.',
+/** Copy used wherever a detail has not been supplied yet. */
+export const tbc = {
+  short: 'To be announced',
+  long: 'Details to follow',
 }
 
 export const gallery = {
@@ -117,44 +173,34 @@ export const gallery = {
 
 export const rsvp = {
   heading: 'Will you be joining us?',
-  intro:
-    'Kindly let us know before 1 November 2026 so we can keep a seat waiting for you.',
-  deadline: '1 November 2026',
+  intro: 'A formal invitation will follow. Do leave us a note in the meantime.',
+  deadline: null,
   maxGuests: 8,
   /**
    * Where the form is delivered.
    *   endpoint  — optional POST url (Formspree, Getform, Basin, your own API…).
-   *               Leave null to skip the network call entirely.
-   *   whatsapp  — international format, digits only. Used for the fallback
-   *               "send us your reply" button. Set to null to hide it.
-   *   email     — used for the mailto fallback. Set to null to hide it.
+   *   whatsapp  — international format, digits only. null hides the button.
+   *   email     — used for the mailto fallback. null hides it.
    */
   endpoint: null,
-  whatsapp: '923001234567',
-  // No address supplied yet. Left null rather than guessed, so the form does
-  // not offer a mailto that would bounce; set it and the button reappears.
+  whatsapp: null,
   email: null,
 }
 
-export const contacts = [
-  { name: 'Imran Khan', role: 'Father of the bride', phone: '+92 300 1234567' },
-  { name: 'Tariq Ali', role: 'Father of the groom', phone: '+92 300 7654321' },
-  { name: 'Sara Khan', role: 'Bride’s sister', phone: '+92 321 1112233' },
-  { name: 'Bilal Ali', role: 'Groom’s brother', phone: '+92 321 4445566' },
-]
+export const contacts = []
 
 export const site = {
-  title: 'Radia & Umar — Wedding Invitation',
+  title: 'Radia & Umar — Wedding Celebrations',
   description:
-    'Together with their families, Radia & Umar request the pleasure of your presence. 13–15 November 2026, Lahore.',
+    'Younus Abdul Karim & Makia Younus joyfully announce the wedding celebrations of their beloved grand daughter Radia, with Umar. Dubai, 16–27 December 2026. Karachi, 6–8 January 2027.',
+  family: 'Abdul Karim Family',
+  followUp: 'Formal invitation to follow',
   footerNote: 'We cannot wait to celebrate with you.',
 }
 
 /** The monogram, built by `npm run logo` from brand/monogram.jpg. */
 export const logo = {
-  /** Just the RU mark — for the nav, the loader and the hero. */
   mark: '/brand/mark.webp',
-  /** The mark with the names set beneath it. */
   full: '/brand/logo.webp',
   alt: 'Radia & Umar',
 }
@@ -170,3 +216,4 @@ export const mapsEmbedUrl = (query) =>
   `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`
 
 export const eventById = (id) => events.find((e) => e.id === id)
+export const cityById = (id) => cities.find((c) => c.id === id)

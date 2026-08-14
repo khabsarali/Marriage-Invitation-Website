@@ -1,5 +1,20 @@
 import { Section, SectionHeading, Reveal, Still } from './primitives.jsx'
-import { events, mapsUrl } from '../../config/wedding.config.js'
+import { events, mapsUrl, tbc } from '../../config/wedding.config.js'
+
+/**
+ * One fact. Dates, times and venues are not settled yet, so an absent value
+ * renders as the placeholder rather than as an empty line — a blank `dd` reads
+ * as a bug, and a guessed value would be worse than either.
+ */
+function Fact({ label, children, value }) {
+  const has = value !== null && value !== undefined && value !== ''
+  return (
+    <div className="event__fact">
+      <dt>{label}</dt>
+      <dd className={has ? undefined : 'event__fact--pending'}>{has ? children : tbc.short}</dd>
+    </div>
+  )
+}
 
 function EventCard({ event, index }) {
   return (
@@ -13,25 +28,12 @@ function EventCard({ event, index }) {
         <p className="event__tagline">{event.tagline}</p>
 
         <dl className="event__facts">
-          <div className="event__fact">
-            <dt>Date</dt>
-            <dd>
-              <time dateTime={event.dateISO}>{event.date}</time>
-              <span className="event__weekday">{event.weekday}</span>
-            </dd>
-          </div>
-          <div className="event__fact">
-            <dt>Time</dt>
-            <dd>{event.time}</dd>
-          </div>
-          <div className="event__fact">
-            <dt>Venue</dt>
-            <dd>{event.venue}</dd>
-          </div>
-          <div className="event__fact">
-            <dt>Location</dt>
-            <dd>{event.address}</dd>
-          </div>
+          <Fact label="Date" value={event.date}>
+            <time dateTime={event.dateISO ?? undefined}>{event.date}</time>
+          </Fact>
+          <Fact label="Time" value={event.time}>{event.time}</Fact>
+          <Fact label="Venue" value={event.venue}>{event.venue}</Fact>
+          <Fact label="Location" value={event.address}>{event.address}</Fact>
           {event.dress && (
             <div className="event__fact">
               <dt>Dress</dt>
@@ -40,14 +42,17 @@ function EventCard({ event, index }) {
           )}
         </dl>
 
-        <a
-          className="btn btn--ghost event__map"
-          href={mapsUrl(event.mapQuery)}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Open in Google Maps
-        </a>
+        {/* Only once a real venue exists — a maps link is never guessed. */}
+        {event.mapQuery && (
+          <a
+            className="btn btn--ghost event__map"
+            href={mapsUrl(event.mapQuery)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open in Google Maps
+          </a>
+        )}
       </div>
     </Reveal>
   )
@@ -59,7 +64,7 @@ export default function Events() {
       <SectionHeading
         kicker="Three evenings"
         title="The Celebrations"
-        intro="Every chapter of the film is an evening we would love you to be part of."
+        intro="Every chapter of the film is an evening we would love you to be part of. Dates and venues follow with the formal invitation."
       />
 
       <div className="events__grid">

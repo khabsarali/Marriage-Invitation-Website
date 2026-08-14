@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import StoryLoader from './components/loader/StoryLoader.jsx'
 import CinematicExperience from './components/cinematic/CinematicExperience.jsx'
 import Nav from './components/site/Nav.jsx'
+import Prologue from './components/site/Prologue.jsx'
 import Hero from './components/site/Hero.jsx'
 import Countdown from './components/site/Countdown.jsx'
 import Events from './components/site/Events.jsx'
@@ -282,6 +283,11 @@ export default function App() {
       <Nav visible={filmDone && !filmActive} />
 
       <main className="page">
+        {/* The run-up to the film: opening lines, the two cities, the
+            announcement, the couple. Sits above the pinned stage and does not
+            reach into it. */}
+        <Prologue reducedMotion={reducedMotion} />
+
         {showFilm && sequence && variant && (
           <CinematicExperience
             variant={variant}

@@ -1,5 +1,5 @@
 import { Reveal, Ornament } from './primitives.jsx'
-import { coupleNames, invitation, weddingDate, couple, logo } from '../../config/wedding.config.js'
+import { coupleNames, invitation, weddingDate, logo, announcement, site } from '../../config/wedding.config.js'
 
 export default function Hero() {
   return (
@@ -17,8 +17,11 @@ export default function Hero() {
           {invitation.blessing}
         </Reveal>
 
-        <Reveal as="p" className="hero__kicker" delay={80}>
-          {invitation.kicker}
+        <Reveal as="p" className="hero__hosts" delay={80}>
+          {announcement.hosts}
+        </Reveal>
+        <Reveal as="p" className="hero__kicker" delay={120}>
+          {announcement.lead} <em>{announcement.heading}</em> {announcement.relation.toLowerCase()}
         </Reveal>
 
         <Reveal className="hero__names" delay={140}>
@@ -49,8 +52,8 @@ export default function Hero() {
           </span>
         </Reveal>
 
-        <Reveal as="p" className="hero__hashtag" delay={400}>
-          {couple.hashtag}
+        <Reveal as="p" className="hero__followup" delay={400}>
+          {site.followUp}
         </Reveal>
       </div>
 

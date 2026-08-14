@@ -1723,3 +1723,445 @@ html.lenis body {
     height: 72%;
   }
 }
+
+/* ==========================================================================
+   Prologue — the run-up to the film
+   Opening lines -> Dubai -> the crossing -> Karachi -> announcement -> couple.
+   Ivory ground with the two city plates as the only dark passages, so they
+   carry the weight and the type stays quiet.
+   ========================================================================== */
+
+.prologue {
+  position: relative;
+  z-index: 1;
+  background: var(--ivory);
+}
+
+/* --- the opening ---------------------------------------------------------- */
+.overture {
+  min-height: calc(var(--app-vh) * 100);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  padding: clamp(3rem, 10vh, 7rem) 1.5rem;
+}
+.overture__mark {
+  width: clamp(5.5rem, 16vw, 8.5rem);
+  height: auto;
+  margin-bottom: clamp(1.5rem, 4vh, 2.6rem);
+}
+.overture__bismillah {
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 0.85rem + 0.5vw, 1.2rem);
+  color: var(--gold);
+  margin-bottom: clamp(2rem, 6vh, 3.4rem);
+  line-height: 2;
+}
+.overture__lines {
+  display: grid;
+  gap: clamp(0.9rem, 2.4vh, 1.6rem);
+  max-width: 30rem;
+}
+.overture__line {
+  font-family: var(--font-display);
+  font-weight: 300;
+  line-height: 1.25;
+  color: var(--ink);
+}
+/* A hierarchy across the three, so they read as one sentence unfolding. */
+.overture__line--1 {
+  font-size: clamp(1.6rem, 1.1rem + 2.4vw, 2.9rem);
+}
+.overture__line--2 {
+  font-size: clamp(1.2rem, 0.95rem + 1.4vw, 1.9rem);
+  color: var(--ink-soft);
+  font-style: italic;
+}
+.overture__line--3 {
+  font-size: clamp(0.78rem, 0.72rem + 0.5vw, 0.95rem);
+  font-family: var(--font-sans);
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-top: clamp(0.6rem, 2vh, 1.2rem);
+}
+.overture__hint {
+  margin-top: clamp(2.5rem, 8vh, 4.5rem);
+  font-size: 0.6rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* --- a city plate -------------------------------------------------------- */
+.cityplate {
+  position: relative;
+  min-height: calc(var(--app-vh) * 100);
+  display: grid;
+  align-content: end;
+  overflow: hidden;
+  background: #0d0b0a;
+  isolation: isolate;
+}
+/* Oversized so the parallax drift never exposes an edge. */
+.cityplate__layer {
+  position: absolute;
+  inset: -8% 0;
+  z-index: -2;
+  will-change: transform;
+}
+.cityplate__photo,
+.cityplate__composed {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Composed stand-in, used until a photograph is supplied. Architectural rather
+   than a grey box: a warm glow low on the horizon, a darker mass beneath it,
+   and a scatter of window lights. */
+.cityplate__composed {
+  position: relative;
+  background: linear-gradient(180deg, var(--deep) 0%, var(--mid) 62%, #0b0a09 100%);
+}
+.cityplate__glow {
+  position: absolute;
+  left: 50%;
+  bottom: 26%;
+  width: 120%;
+  aspect-ratio: 2 / 1;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, var(--light), transparent 72%);
+  opacity: 0.34;
+}
+.cityplate__horizon {
+  position: absolute;
+  inset: auto 0 0;
+  height: 34%;
+  background: linear-gradient(180deg, transparent, rgba(8, 7, 6, 0.6) 40%, #080706 100%);
+}
+.cityplate__lights {
+  position: absolute;
+  inset: auto 0 8%;
+  height: 26%;
+  opacity: 0.45;
+  background-image: radial-gradient(circle, var(--light) 40%, transparent 45%);
+  background-size: 3.2% 9%;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 55%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 55%, transparent);
+}
+
+.cityplate__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(to bottom, rgba(8, 7, 6, 0.5), transparent 34%),
+    linear-gradient(to top, rgba(8, 7, 6, 0.86), transparent 62%);
+}
+.cityplate__copy {
+  padding: 0 clamp(1.5rem, 6vw, 5rem) clamp(3rem, 12vh, 7rem);
+  color: var(--ivory);
+  max-width: 40rem;
+}
+.cityplate__eyebrow {
+  font-size: 0.62rem;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  margin-bottom: 0.9rem;
+}
+.cityplate__name {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(3rem, 1.6rem + 8vw, 7rem);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  color: #fff;
+  text-shadow: 0 8px 50px rgba(0, 0, 0, 0.5);
+}
+.cityplate__dates {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.7rem, 2vw, 1.3rem);
+  margin-top: clamp(0.9rem, 2.5vh, 1.6rem);
+  flex-wrap: wrap;
+}
+.cityplate__days {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 0.9rem + 1.6vw, 2rem);
+  color: var(--gold-light);
+}
+.cityplate__rule {
+  flex: 0 0 clamp(1.6rem, 6vw, 4rem);
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+.cityplate__month {
+  font-size: clamp(0.72rem, 0.68rem + 0.4vw, 0.9rem);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(248, 243, 234, 0.86);
+}
+.cityplate__month span {
+  color: var(--gold-light);
+}
+
+/* --- Dubai -> Karachi ---------------------------------------------------- */
+.crossing {
+  position: relative;
+  min-height: clamp(20rem, 62vh, 34rem);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  padding: clamp(3rem, 10vh, 6rem) 1.5rem;
+  background: #0b0a09;
+  color: var(--ivory);
+  overflow: hidden;
+}
+/* Carries the eye from one city to the next. */
+.crossing__wash {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(80% 120% at 0% 50%, rgba(201, 164, 95, 0.22), transparent 60%),
+    radial-gradient(80% 120% at 100% 50%, rgba(217, 189, 133, 0.18), transparent 60%);
+}
+.crossing__line {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(0.9rem, 3vw, 2rem);
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 0.9rem + 2.2vw, 2.6rem);
+  letter-spacing: 0.06em;
+}
+.crossing__arrow {
+  position: relative;
+  width: clamp(2.5rem, 10vw, 6rem);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+}
+.crossing__arrow::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -2px;
+  width: 5px;
+  height: 5px;
+  border-top: 1px solid var(--gold-light);
+  border-right: 1px solid var(--gold-light);
+  transform: rotate(45deg);
+}
+.crossing__note {
+  position: relative;
+  margin-top: clamp(1rem, 3vh, 1.8rem);
+  font-size: 0.66rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(248, 243, 234, 0.6);
+  max-width: 26rem;
+  line-height: 2;
+}
+
+/* --- the announcement ---------------------------------------------------- */
+.announce {
+  min-height: calc(var(--app-vh) * 92);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: clamp(0.7rem, 2vh, 1.2rem);
+  padding: clamp(4rem, 12vh, 8rem) 1.5rem;
+  max-width: 46rem;
+  margin-inline: auto;
+}
+.announce__hosts {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 0.9rem + 0.9vw, 1.5rem);
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  text-transform: uppercase;
+}
+.announce__lead,
+.announce__relation {
+  font-size: clamp(0.62rem, 0.6rem + 0.25vw, 0.74rem);
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.announce__heading {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(2.2rem, 1.3rem + 4.6vw, 4.4rem);
+  line-height: 1.05;
+  color: var(--ink);
+  margin: clamp(0.5rem, 1.5vh, 1rem) 0;
+}
+
+/* --- the couple ---------------------------------------------------------- */
+.reveal-couple {
+  min-height: calc(var(--app-vh) * 100);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  padding: clamp(3rem, 10vh, 7rem) 1.5rem;
+  background:
+    radial-gradient(70% 50% at 50% 45%, var(--gold-glow), transparent 70%),
+    var(--ivory);
+}
+.reveal-couple__name {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(3rem, 1.4rem + 9vw, 7.5rem);
+  line-height: 1;
+  letter-spacing: 0.03em;
+  color: var(--ink);
+}
+.reveal-couple__joiner {
+  font-family: var(--font-script);
+  font-size: clamp(1.5rem, 0.9rem + 2.6vw, 2.8rem);
+  color: var(--gold);
+  margin: clamp(0.4rem, 1.6vh, 1rem) 0;
+}
+
+/* --- into the film ------------------------------------------------------- */
+.filmcue {
+  min-height: clamp(16rem, 52vh, 26rem);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: clamp(3rem, 10vh, 6rem) 1.5rem;
+  /* Settles to the film's own black, so the handover is not a hard cut. */
+  background: linear-gradient(180deg, var(--ivory), #0d0b0a);
+}
+.filmcue__line {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1rem, 0.85rem + 1.1vw, 1.6rem);
+  color: var(--gold-light);
+  max-width: 24rem;
+  line-height: 1.7;
+}
+
+/* --- venue: two cities --------------------------------------------------- */
+.venue__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: clamp(1.2rem, 3vw, 2.4rem);
+}
+.venue__panel {
+  padding: clamp(1.8rem, 4vw, 3rem);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  text-align: center;
+}
+.venue__eyebrow {
+  font-size: 0.6rem;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.venue__city {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(2rem, 1.3rem + 3vw, 3.2rem);
+  margin-top: 0.5rem;
+  color: var(--ink);
+}
+.venue__when {
+  margin-top: 0.5rem;
+  font-size: 0.76rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.venue__when span {
+  color: var(--gold);
+}
+.venue__hair {
+  display: block;
+  width: 3rem;
+  height: 1px;
+  margin: clamp(1.2rem, 3vh, 1.8rem) auto;
+  background: var(--gold);
+  opacity: 0.5;
+}
+.venue__place {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--ink);
+}
+.venue__address {
+  margin-top: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+.venue__directions {
+  margin-top: 1.4rem;
+}
+.venue__pending,
+.event__fact--pending {
+  color: var(--ink-faint);
+  font-style: italic;
+}
+.venue__pending {
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+}
+
+/* --- hero + footer additions -------------------------------------------- */
+.hero__hosts {
+  font-family: var(--font-display);
+  font-size: clamp(0.9rem, 0.84rem + 0.4vw, 1.15rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 0.7rem;
+}
+.hero__kicker em {
+  font-family: var(--font-display);
+  font-style: normal;
+  color: var(--gold);
+  letter-spacing: 0.12em;
+}
+.hero__followup,
+.footer__family {
+  font-size: 0.66rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.hero__followup {
+  margin-top: clamp(1.4rem, 4vh, 2.4rem);
+}
+.footer__family {
+  margin-top: 0.5rem;
+  color: var(--gold);
+}
+
+@media (max-width: 768px) {
+  .cityplate__copy {
+    max-width: none;
+  }
+  .crossing__line {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .crossing__arrow {
+    width: 1px;
+    height: 2.2rem;
+    background: linear-gradient(180deg, transparent, var(--gold-light), transparent);
+  }
+  .crossing__arrow::after {
+    right: -2px;
+    top: auto;
+    bottom: 0;
+    transform: rotate(135deg);
+  }
+}

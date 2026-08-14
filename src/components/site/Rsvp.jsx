@@ -235,7 +235,9 @@ export default function Rsvp() {
           {status === 'sending' ? 'Sending…' : 'Send our reply'}
         </button>
 
-        <p className="rsvp__deadline">Kindly reply by {rsvpConfig.deadline}.</p>
+        {rsvpConfig.deadline && (
+          <p className="rsvp__deadline">Kindly reply by {rsvpConfig.deadline}.</p>
+        )}
       </Reveal>
     </Section>
   )

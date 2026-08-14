@@ -1,58 +1,63 @@
 import { Section, SectionHeading, Reveal } from './primitives.jsx'
-import { primaryVenue, eventById, mapsUrl, mapsEmbedUrl } from '../../config/wedding.config.js'
+import { cities, events, mapsUrl, tbc } from '../../config/wedding.config.js'
 
-export default function Venue() {
-  const event = eventById(primaryVenue.eventId)
-  if (!event) return null
+/**
+ * Where the celebrations happen. The wedding spans two cities, so this reads as
+ * two panels rather than one venue with one map.
+ *
+ * No venue has been settled yet, so each panel names its city and dates and
+ * holds space for the address. "Get directions" only appears once a `mapQuery`
+ * exists on one of that city's events — a maps link is not invented, and a
+ * button that leads nowhere is worse than no button.
+ */
+function CityPanel({ city, index }) {
+  const cityEvents = events.filter((e) => e.city === city.id)
+  const located = cityEvents.find((e) => e.mapQuery)
 
   return (
-    <Section id="venue" className="section--venue" label="Venue">
-      <SectionHeading kicker="How to find us" title={primaryVenue.heading} />
+    <Reveal as="article" className="venue__panel" delay={index * 140}>
+      <p className="venue__eyebrow">{index === 0 ? 'First' : 'Then'}</p>
+      <h3 className="venue__city">{city.name}</h3>
 
-      <div className="venue__layout">
-        <Reveal className="venue__card">
-          <p className="venue__event">{event.name}</p>
-          <h3 className="venue__name">{event.venue}</h3>
-          <address className="venue__address">{event.address}</address>
+      <p className="venue__when">
+        {city.dates} {city.month} <span>{city.year}</span>
+      </p>
 
-          <dl className="venue__meta">
-            <div>
-              <dt>Date</dt>
-              <dd>
-                {event.weekday}, {event.date}
-              </dd>
-            </div>
-            <div>
-              <dt>Time</dt>
-              <dd>{event.time}</dd>
-            </div>
-          </dl>
+      <span className="venue__hair" aria-hidden="true" />
 
-          {primaryVenue.note && <p className="venue__note">{primaryVenue.note}</p>}
-
+      {located ? (
+        <>
+          <p className="venue__place">{located.venue}</p>
+          <p className="venue__address">{located.address}</p>
           <a
-            className="btn btn--solid"
-            href={mapsUrl(event.mapQuery)}
+            className="btn btn--ghost venue__directions"
+            href={mapsUrl(located.mapQuery)}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="noreferrer noopener"
           >
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="btn__icon">
-              <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z" />
-              <circle cx="12" cy="10" r="2.6" />
-            </svg>
-            Get Directions
+            Get directions
           </a>
-        </Reveal>
+        </>
+      ) : (
+        <p className="venue__pending">{tbc.short}</p>
+      )}
+    </Reveal>
+  )
+}
 
-        <Reveal className="venue__map" delay={120}>
-          <iframe
-            title={`Map to ${event.venue}`}
-            src={mapsEmbedUrl(event.mapQuery)}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            allowFullScreen
-          />
-        </Reveal>
+export default function Venue() {
+  return (
+    <Section id="venue" className="section--venue" label="The venues">
+      <SectionHeading
+        kicker="Where"
+        title="Two Cities"
+        intro="The celebrations open in Dubai and continue in Karachi. Venues will be shared with the formal invitation."
+      />
+
+      <div className="venue__grid">
+        {cities.map((city, i) => (
+          <CityPanel key={city.id} city={city} index={i} />
+        ))}
       </div>
     </Section>
   )
