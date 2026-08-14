@@ -1,8 +1,14 @@
 import { logo } from '../../config/wedding.config.js'
 
 /**
- * The first thing anyone sees. Holds the page still until enough of the film
- * has arrived to play it without stuttering.
+ * The film's loader: holds the page still until enough of the sequence has
+ * arrived to play it without stuttering.
+ *
+ * Not on the page today. With ENABLE_3D_EXPERIENCE off there is no film to wait
+ * for, and the invitation opens behind Preloader.jsx instead — a much shorter
+ * wait, for fonts and one image. Kept for when the film comes back; its styles
+ * are the `.loader` block of src/styles/film.css, which this file deliberately
+ * does not import, so nothing here reaches a normal visit.
  */
 export default function StoryLoader({ progress, leaving, failed, onSkip }) {
   const percent = Math.round(progress * 100)
@@ -16,8 +22,8 @@ export default function StoryLoader({ progress, leaving, failed, onSkip }) {
           className="loader__monogram"
           src={logo.mark}
           alt={logo.alt}
-          width="640"
-          height="597"
+          width="420"
+          height="392"
           fetchPriority="high"
         />
 

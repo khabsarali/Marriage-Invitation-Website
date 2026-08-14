@@ -17,6 +17,11 @@ import {
 } from '../../config/scenes.config.js'
 import { coupleNames, invitation } from '../../config/wedding.config.js'
 
+// The film's own stylesheet — the stage, the chapter rail, the sound toggle and
+// the frame loader. It travels with this component rather than sitting in
+// global.css so that a visit with the film off never downloads it.
+import '../../styles/film.css'
+
 gsap.registerPlugin(ScrollTrigger)
 
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v)

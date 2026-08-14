@@ -8,7 +8,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview --port 4173",
-    "logo": "node scripts/build-logo.mjs"
+    "logo": "node scripts/build-logo.mjs",
+    "stills": "node scripts/build-stills.mjs"
   },
   "dependencies": {
     "gsap": "^3.13.0",

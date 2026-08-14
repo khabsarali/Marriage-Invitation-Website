@@ -1,9 +1,24 @@
 # Marriage Invitation Website
 
-A cinematic digital wedding invitation. The visitor first scrolls through a
-scroll-driven film — **Mehndi → Barat → Walima → the couple on the sofa** —
-rendered from the supplied frame sequence through a WebGL pipeline. Only when
-the film ends does the invitation itself begin.
+A digital wedding invitation for Radia and Umar, built to read like luxury
+stationery rather than a wedding template: three grounds (paper, ivory, ink),
+two typefaces, gold used only as a hairline, and no cards anywhere.
+
+The visitor opens on the monogram, then the invitation runs:
+
+```
+envelope  ->  hero  ->  Dubai × Karachi  ->  announcement  ->  the couple
+          ->  order of events  ->  countdown  ->  RSVP  ->  closing
+```
+
+**Every fact appears exactly once.** The names are the hero and the closing
+page; the two date ranges belong to the cities section and are set nowhere
+else; the hosts belong to the announcement. If something starts appearing
+twice, the second one is the mistake.
+
+A scroll-driven WebGL film — **Mehndi → Barat → Walima** — is also in this
+repository, and is **off**. See [No film, and what that
+means](#no-film-and-what-that-means).
 
 ---
 
@@ -13,6 +28,7 @@ the film ends does the invitation itself begin.
 npm install
 npm run frames     # one-off: turns the source PNGs into optimised web assets
 npm run logo       # one-off: keys the monogram off its card and cuts favicons
+npm run stills     # one-off: builds the ambient plates the page paints with
 npm run dev
 ```
 
@@ -24,20 +40,78 @@ dropped on Netlify, Vercel, Cloudflare Pages, GitHub Pages or any static host.
 ## Editing the wedding details
 
 **Everything a guest reads lives in [`src/config/wedding.config.js`](src/config/wedding.config.js).**
-Names, the countdown date, all three events, the venue, the map queries, the
-RSVP settings and the family phone numbers. No component hardcodes any of it.
+Names, the two cities and their dates, the countdown, all three evenings, the
+RSVP settings and the Instagram handle. No component hardcodes any of it.
 
-> The values shipped in that file are **placeholders** — replace them with the
-> real details before sending the link to anyone.
+Anything not yet settled is `null` rather than guessed — the three evenings have
+no dates, times or venues, so they read "To be announced". Fill a value in and
+it appears; nothing else has to change. The same is true of photography: set
+`cities[].image` and that city's engraving becomes a photograph, or set
+`couple.bride.image` and the couple reveal gains a portrait.
 
 The RSVP form works without a backend: it validates, stores the reply locally
-and hands off to WhatsApp or email using the numbers in the config. If you would
-rather collect replies centrally, set `rsvp.endpoint` to a form endpoint
-(Formspree, Getform, Basin, your own API) and the form will `POST` JSON to it as
-well.
+and hands off to WhatsApp or email once `rsvp.whatsapp` / `rsvp.email` are set.
+If you would rather collect replies centrally, set `rsvp.endpoint` to a form
+endpoint (Formspree, Getform, Basin, your own API) and the form will `POST` JSON
+to it as well.
 
 The film's pacing, grading and chapter titles live in
-[`src/config/scenes.config.js`](src/config/scenes.config.js).
+[`src/config/scenes.config.js`](src/config/scenes.config.js), along with the
+switch that turns it on.
+
+---
+
+## No film, and what that means
+
+`ENABLE_3D_EXPERIENCE` in [`src/config/scenes.config.js`](src/config/scenes.config.js)
+is `false`. The film is not merely hidden — it is absent:
+
+* `App.jsx` renders `FilmStage` behind that flag **and** behind a dynamic
+  import, so with the flag off the module is never fetched. Nothing pulls in
+  three.js, GSAP, the frame loader, the score or `film.css`.
+* The frame manifest is never requested, so not one of the 34 MB of frames is
+  either — on desktop, laptop, tablet or phone.
+* No 3D CSS ships with the page: the stage, chapter rail, sound toggle and film
+  loader live in [`src/styles/film.css`](src/styles/film.css), which only
+  `CinematicExperience.jsx` imports.
+
+What a visitor downloads is the invitation: one JS bundle, one stylesheet, the
+monogram and one plate.
+
+Set the flag to `true` and the film returns, mounted between the hero and the
+rest of the invitation. Two things to know if you do: the page's own preloader
+opens first and `FilmStage`'s loader then holds the page while frames prime, and
+the redesigned invitation no longer fades its ivory ground into the film's
+black, so the hand-over will want a look at.
+
+---
+
+## The ambient plates
+
+The page paints with three large, quiet images —
+[`scripts/build-stills.mjs`](scripts/build-stills.mjs), `npm run stills`.
+
+There is no photography of Radia and Umar in this project, and every frame of
+the film shows a stand-in couple, so no frame can be used as-is: it would read
+as a photograph of them, which it is not. What the frames *do* hold is the set,
+and a camera that pushes in across every scene. Taking the per-pixel median of a
+whole scene keeps the set and turns that push-in into a radial smear, so what
+comes out is the light and the palette of the evening with nobody in it.
+
+| | |
+|---|---|
+| `hero-wide.webp`, `hero-tall.webp` | the mehndi set — marigold light behind the names, one per orientation |
+| `chandeliers.webp` | the barat hall, behind the countdown |
+| `roses.webp` | the walima room, behind the closing page |
+
+The two interiors keep a soft silhouette mid-frame, so those plates take a side
+of the room instead of the whole median; the crop is in the script and is
+commented there.
+
+The cities are **drawn**, not photographed — see
+[`src/components/site/Skyline.jsx`](src/components/site/Skyline.jsx). Fine line
+work belongs to the same world as a printed invitation, where a stock skyline
+photograph does not.
 
 ---
 
@@ -58,6 +132,12 @@ the site serves. It is the only place the source PNGs are touched.
 It also writes `public/frames/manifest.json` (which maps the original frame
 numbers onto output indices, so the scene config stays readable) and
 `src/config/stills.generated.js`.
+
+> The gallery stills and portrait crops in that table are **not used by the
+> page**. They are full frames of the film's stand-in couple, and the redesigned
+> invitation shows no photograph of a couple at all — the plates it does paint
+> with come from `npm run stills` instead, and are named differently, so running
+> either script never overwrites the other's output.
 
 ```bash
 npm run frames             # full rebuild
@@ -152,24 +232,37 @@ decoded, or Web Audio is missing, the film simply plays silent.
 brand/monogram.jpg              the supplied RU monogram, on its white card
 scripts/build-frames.mjs        asset pipeline (source PNGs -> WebP + manifest)
 scripts/build-logo.mjs          monogram -> keyed WebP marks + favicons
+scripts/build-stills.mjs        film frames -> the page's ambient plates
 src/
   config/
     wedding.config.js           >>> all wedding content <<<
-    scenes.config.js            story beats, grading, scroll pacing
-    stills.generated.js         written by the pipeline
+    scenes.config.js            the film: on/off switch, beats, grading, pacing
   lib/
-    FrameSequence.js            streaming loader + bounded decode window
-    FilmAudio.js                the score — gapless loop, fades, gesture unlock
-    CinematicRenderer.js        WebGL stage, texture pool, Canvas2D fallback
-    shaders.js                  the film pass and the dust layer
-    manifest.js                 frame manifest + source-frame mapping
-    hooks.js                    device profile, countdown, scroll reveal
+    hooks.js                    device profile, countdown, reveal, parallax
+    FrameSequence.js            film — streaming loader + bounded decode window
+    FilmAudio.js                film — the score, gapless loop, gesture unlock
+    CinematicRenderer.js        film — WebGL stage, Canvas2D fallback
+    shaders.js                  film — the film pass and the dust layer
+    manifest.js                 film — frame manifest + source-frame mapping
   components/
-    loader/StoryLoader.jsx
+    loader/Preloader.jsx        the envelope, shown while fonts and the plate land
+    loader/StoryLoader.jsx      the film's loader (not on the page today)
+    cinematic/FilmStage.jsx     everything the film needs, behind the switch
     cinematic/CinematicExperience.jsx
-    site/                       Nav, Hero, Countdown, Events, Venue,
-                                Couple, Gallery, Rsvp, Footer, primitives
-  styles/global.css
+    site/
+      primitives.jsx            Reveal, MaskLines, Rule, Eyebrow, Section
+      Nav.jsx                   five words, a monogram, and a sheet on phones
+      Hero.jsx                  the names, at full scale, once
+      Crossing.jsx + Skyline.jsx    Dubai × Karachi, and their only dates
+      Announcement.jsx          the hosts' announcement — type and air
+      CoupleReveal.jsx          Radia · with · Umar, and the verse
+      Events.jsx                the order of events, as a timeline
+      Countdown.jsx             one countdown, four numerals
+      Rsvp.jsx                  the response card
+      Closing.jsx               the back of the card
+  styles/
+    global.css                  the invitation
+    film.css                    the film, loaded only with the film
 ```
 
 ---

@@ -85,6 +85,93 @@ export function useCountdown(iso) {
   }
 }
 
+/**
+ * Slow vertical drift for something behind type — the hero plate, a skyline,
+ * the closing wash.
+ *
+ * Deliberately not GSAP/ScrollTrigger. Parallax is the only scroll-driven
+ * effect left on the site now that the film is off, and it is one transform on
+ * one element; doing it here keeps GSAP out of the bundle every visitor
+ * downloads. It writes a `--parallax` percentage the stylesheet applies, so the
+ * element keeps whatever transform CSS gives it.
+ *
+ * Only runs while the element is near the viewport, and never under
+ * `prefers-reduced-motion`.
+ */
+export function useParallax({ from = -5, to = 5, disabled = false } = {}) {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el || disabled) return
+
+    let frame = 0
+    let near = false
+
+    const apply = () => {
+      frame = 0
+      const rect = el.getBoundingClientRect()
+      const vh = window.innerHeight || 1
+      // 0 as the element's top reaches the bottom of the screen, 1 as its
+      // bottom leaves the top — so the drift is spread over the whole pass.
+      const span = vh + rect.height
+      const raw = (vh - rect.top) / span
+      const t = raw < 0 ? 0 : raw > 1 ? 1 : raw
+      el.style.setProperty('--parallax', `${(from + (to - from) * t).toFixed(3)}%`)
+    }
+
+    const onScroll = () => {
+      if (near && !frame) frame = requestAnimationFrame(apply)
+    }
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        near = entry.isIntersecting
+        if (near) onScroll()
+      },
+      { rootMargin: '150px 0px' }
+    )
+    io.observe(el)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    apply()
+
+    return () => {
+      io.disconnect()
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      if (frame) cancelAnimationFrame(frame)
+      el.style.removeProperty('--parallax')
+    }
+  }, [from, to, disabled])
+
+  return ref
+}
+
+/** True once the page has scrolled past `offset` — used to settle the nav. */
+export function useScrolledPast(offset = 80) {
+  const [past, setPast] = useState(false)
+
+  useEffect(() => {
+    let frame = 0
+    const read = () => {
+      frame = 0
+      setPast(window.scrollY > offset)
+    }
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(read)
+    }
+    read()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      if (frame) cancelAnimationFrame(frame)
+    }
+  }, [offset])
+
+  return past
+}
+
 /** Adds `is-visible` the first time an element scrolls into view. */
 export function useReveal(options) {
   const ref = useRef(null)

@@ -1,32 +1,36 @@
 import { useMemo, useState } from 'react'
-import { Section, SectionHeading, Reveal } from './primitives.jsx'
-import { rsvp as rsvpConfig, events, coupleNames } from '../../config/wedding.config.js'
+import { Reveal, MaskLines, Rule } from './primitives.jsx'
+import { rsvp as rsvpConfig, coupleNames } from '../../config/wedding.config.js'
 
+/**
+ * The response card.
+ *
+ * Four questions, in the order they would be printed: your name, whether you
+ * will come, how many of you, and anything you would like to say. The evenings
+ * picker that used to sit in here is gone — the evenings have no dates yet, so
+ * asking guests to choose between them asks them to commit to nothing.
+ *
+ * Fields are ruled lines rather than boxes, which is what a card looks like and
+ * happens to be far less furniture on the page.
+ *
+ * Delivery is unchanged: POST to `endpoint` when one is configured, keep a copy
+ * in localStorage either way, and offer WhatsApp and email as the fallback.
+ * With all three unset the reply is still acknowledged and stored, so the form
+ * is never a dead end while the family decides where replies should go.
+ */
 const STORAGE_KEY = 'wedding-rsvp'
 
-const emptyForm = {
-  name: '',
-  attending: '',
-  guests: 1,
-  events: events.map((e) => e.id),
-  message: '',
-}
+const emptyForm = { name: '', attending: '', guests: 1, message: '' }
 
 /** A readable one-message summary, used for the WhatsApp / email handoff. */
 function summarise(form) {
-  const eventNames = events
-    .filter((e) => form.events.includes(e.id))
-    .map((e) => e.name)
-    .join(', ')
-
   const lines = [
     `RSVP for ${coupleNames[0]} & ${coupleNames[1]}`,
     `Name: ${form.name}`,
     form.attending === 'yes'
-      ? `Attending: Yes — ${form.guests} ${form.guests === 1 ? 'guest' : 'guests'}`
-      : 'Attending: Sadly unable to attend',
+      ? `Attending: Joyfully — ${form.guests} ${form.guests === 1 ? 'guest' : 'guests'}`
+      : 'Attending: Regretfully unable',
   ]
-  if (form.attending === 'yes' && eventNames) lines.push(`Events: ${eventNames}`)
   if (form.message.trim()) lines.push(`Message: ${form.message.trim()}`)
   return lines.join('\n')
 }
@@ -37,13 +41,6 @@ export default function Rsvp() {
   const [error, setError] = useState('')
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }))
-
-  const toggleEvent = (id) =>
-    setForm((f) => ({
-      ...f,
-      events: f.events.includes(id) ? f.events.filter((e) => e !== id) : [...f.events, id],
-    }))
-
   const summary = useMemo(() => summarise(form), [form])
 
   const whatsappHref = rsvpConfig.whatsapp
@@ -94,92 +91,101 @@ export default function Rsvp() {
   if (status === 'done') {
     const accepted = form.attending === 'yes'
     return (
-      <Section id="rsvp" className="section--rsvp" label="RSVP">
-        <Reveal className="rsvp__thanks">
-          <p className="rsvp__thanks-kicker">{accepted ? 'Thank you' : 'We understand'}</p>
-          <h2 className="rsvp__thanks-title">
-            {accepted ? 'Your seat is saved' : 'You will be missed'}
-          </h2>
-          <p className="rsvp__thanks-body">
-            {accepted
-              ? `We have you down for ${form.guests} ${form.guests === 1 ? 'guest' : 'guests'}. We cannot wait to celebrate with you.`
-              : 'Thank you for letting us know. You will be in our thoughts on the day.'}
-          </p>
+      <section className="section section--ivory rsvp" id="rsvp" aria-label="RSVP">
+        <div className="section__inner rsvp__inner">
+          <Reveal className="rsvp__thanks">
+            <p className="eyebrow">{accepted ? 'Thank you' : 'We understand'}</p>
+            <h2 className="rsvp__heading">{accepted ? 'Your seat is saved' : 'You will be missed'}</h2>
+            <Rule tight />
+            <p className="rsvp__intro">
+              {accepted
+                ? `We have you down for ${form.guests} ${form.guests === 1 ? 'guest' : 'guests'}. We cannot wait to celebrate with you.`
+                : 'Thank you for letting us know. You will be in our thoughts on the day.'}
+            </p>
 
-          <div className="rsvp__handoff">
-            <p>Please also send us your reply so we have it on record:</p>
-            <div className="rsvp__handoff-actions">
-              {whatsappHref && (
-                <a className="btn btn--solid" href={whatsappHref} target="_blank" rel="noopener noreferrer">
-                  Send on WhatsApp
-                </a>
-              )}
-              {mailHref && (
-                <a className="btn btn--ghost" href={mailHref}>
-                  Send by email
-                </a>
-              )}
-            </div>
-          </div>
+            {(whatsappHref || mailHref) && (
+              <div className="rsvp__handoff">
+                <p>Please also send us your reply so we have it on record:</p>
+                <div className="rsvp__actions">
+                  {whatsappHref && (
+                    <a className="btn" href={whatsappHref} target="_blank" rel="noopener noreferrer">
+                      Send on WhatsApp
+                    </a>
+                  )}
+                  {mailHref && (
+                    <a className="btn btn--quiet" href={mailHref}>
+                      Send by email
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
 
-          <button
-            type="button"
-            className="rsvp__again"
-            onClick={() => {
-              setForm(emptyForm)
-              setStatus('idle')
-            }}
-          >
-            Send another reply
-          </button>
-        </Reveal>
-      </Section>
+            <button
+              type="button"
+              className="link"
+              onClick={() => {
+                setForm(emptyForm)
+                setStatus('idle')
+              }}
+            >
+              Send another reply
+            </button>
+          </Reveal>
+        </div>
+      </section>
     )
   }
 
   return (
-    <Section id="rsvp" className="section--rsvp" label="RSVP">
-      <SectionHeading kicker="RSVP" title={rsvpConfig.heading} intro={rsvpConfig.intro} />
+    <section className="section section--ivory rsvp" id="rsvp" aria-label="RSVP">
+      <div className="section__inner rsvp__inner">
+        <Reveal as="p" className="eyebrow">
+          {rsvpConfig.eyebrow}
+        </Reveal>
+        <MaskLines as="h2" className="rsvp__heading" lines={[rsvpConfig.heading]} delay={100} />
+        <Reveal as="p" className="rsvp__intro" delay={180}>
+          {rsvpConfig.intro}
+        </Reveal>
 
-      <Reveal as="form" className="rsvp__form" onSubmit={submit} noValidate>
-        <div className="field">
-          <label htmlFor="rsvp-name">Your name</label>
-          <input
-            id="rsvp-name"
-            name="name"
-            type="text"
-            autoComplete="name"
-            placeholder="As you would like it on the place card"
-            value={form.name}
-            onChange={(e) => set({ name: e.target.value })}
-            required
-          />
-        </div>
-
-        <fieldset className="field field--choice">
-          <legend>Will you join us?</legend>
-          <div className="choice">
-            <button
-              type="button"
-              className={`choice__btn${form.attending === 'yes' ? ' is-active' : ''}`}
-              onClick={() => set({ attending: 'yes' })}
-              aria-pressed={form.attending === 'yes'}
-            >
-              Joyfully Accept
-            </button>
-            <button
-              type="button"
-              className={`choice__btn${form.attending === 'no' ? ' is-active' : ''}`}
-              onClick={() => set({ attending: 'no', guests: 0 })}
-              aria-pressed={form.attending === 'no'}
-            >
-              Regretfully Decline
-            </button>
+        <Reveal as="form" className="card" onSubmit={submit} noValidate delay={240}>
+          <div className="field">
+            <label htmlFor="rsvp-name">Your name</label>
+            <input
+              id="rsvp-name"
+              name="name"
+              type="text"
+              autoComplete="name"
+              placeholder="As you would like it on the place card"
+              value={form.name}
+              onChange={(e) => set({ name: e.target.value })}
+              required
+            />
           </div>
-        </fieldset>
 
-        {form.attending === 'yes' && (
-          <>
+          <fieldset className="field field--choice">
+            <legend>Will you join us?</legend>
+            <div className="choice">
+              <button
+                type="button"
+                className={`choice__btn${form.attending === 'yes' ? ' is-active' : ''}`}
+                onClick={() => set({ attending: 'yes', guests: form.guests || 1 })}
+                aria-pressed={form.attending === 'yes'}
+              >
+                Joyfully Accept
+              </button>
+              <button
+                type="button"
+                className={`choice__btn${form.attending === 'no' ? ' is-active' : ''}`}
+                onClick={() => set({ attending: 'no', guests: 0 })}
+                aria-pressed={form.attending === 'no'}
+              >
+                Regretfully Decline
+              </button>
+            </div>
+          </fieldset>
+
+          {form.attending === 'yes' && (
             <div className="field">
               <label htmlFor="rsvp-guests">Number of guests</label>
               <select
@@ -194,51 +200,34 @@ export default function Rsvp() {
                 ))}
               </select>
             </div>
+          )}
 
-            <fieldset className="field field--events">
-              <legend>Which evenings?</legend>
-              <div className="pills">
-                {events.map((event) => (
-                  <button
-                    type="button"
-                    key={event.id}
-                    className={`pill${form.events.includes(event.id) ? ' is-active' : ''}`}
-                    onClick={() => toggleEvent(event.id)}
-                    aria-pressed={form.events.includes(event.id)}
-                  >
-                    {event.name}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-          </>
-        )}
+          <div className="field">
+            <label htmlFor="rsvp-message">
+              A note for the couple <span>(optional)</span>
+            </label>
+            <textarea
+              id="rsvp-message"
+              rows="3"
+              placeholder="A blessing, a memory, a song request…"
+              value={form.message}
+              onChange={(e) => set({ message: e.target.value })}
+            />
+          </div>
 
-        <div className="field">
-          <label htmlFor="rsvp-message">A note for the couple <span>(optional)</span></label>
-          <textarea
-            id="rsvp-message"
-            rows="4"
-            placeholder="A blessing, a memory, a song request…"
-            value={form.message}
-            onChange={(e) => set({ message: e.target.value })}
-          />
-        </div>
+          {error && (
+            <p className="rsvp__error" role="alert">
+              {error}
+            </p>
+          )}
 
-        {error && (
-          <p className="rsvp__error" role="alert">
-            {error}
-          </p>
-        )}
+          <button type="submit" className="btn btn--block" disabled={status === 'sending'}>
+            {status === 'sending' ? 'Sending…' : 'Send our reply'}
+          </button>
 
-        <button type="submit" className="btn btn--solid btn--block" disabled={status === 'sending'}>
-          {status === 'sending' ? 'Sending…' : 'Send our reply'}
-        </button>
-
-        {rsvpConfig.deadline && (
-          <p className="rsvp__deadline">Kindly reply by {rsvpConfig.deadline}.</p>
-        )}
-      </Reveal>
-    </Section>
+          {rsvpConfig.deadline && <p className="rsvp__deadline">Kindly reply by {rsvpConfig.deadline}.</p>}
+        </Reveal>
+      </div>
+    </section>
   )
 }

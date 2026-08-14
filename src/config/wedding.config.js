@@ -6,24 +6,39 @@
    Anything not yet supplied is left as `null` rather than guessed. The
    components render "Details to follow" in its place, so a placeholder can
    never be mistaken for a real date or address.
+
+   One further rule, and the reason the site reads the way it does: every fact
+   below appears in exactly ONE place on the page. The names are the hero and
+   the closing page. The two date ranges belong to the cities section and are
+   set nowhere else. The hosts belong to the announcement. If a fact starts
+   showing up twice, the second one is the mistake.
    ========================================================================== */
 
 export const couple = {
   bride: {
     name: 'Radia',
     fullName: 'Radia',
-    /** Shown in the couple section. null hides the line. */
+    /** Shown under the name in the couple reveal. null hides the line. */
     parents: null,
     words: null,
-    image: '/portraits/radia.webp',
+    /**
+     * A photograph for the couple reveal.
+     *
+     * Deliberately null. The one portrait in the project is a professional
+     * headshot in a doctor's coat — a lovely photograph, and the wrong one for
+     * a wedding invitation, where it fights the type rather than joining it.
+     * The reveal is set in type alone until real engagement or wedding
+     * photography exists, at which point a path here is all it takes:
+     * `image: '/portraits/radia.webp'`.
+     */
+    image: null,
   },
   groom: {
     name: 'Umar',
     fullName: 'Umar',
     parents: null,
     words: null,
-    // No photograph supplied yet. The card is omitted rather than filled
-    // with a frame from the film.
+    // No photograph supplied yet. Nothing stands in for it.
     image: null,
   },
   /** Order the names appear as — matches the RU monogram. */
@@ -34,20 +49,35 @@ export const couple = {
 }
 
 /* --------------------------------------------------------------------------
-   The cinematic opening, before the film. Each line lands on its own.
+   The hero. Three lines, three sizes: the eyebrow above the names, the names
+   themselves, and the two supporting lines beneath. This is the only place the
+   names are set at full scale.
+
+   `still` is the ambient plate behind them — see scripts/build-stills.mjs for
+   where those images come from and why they are abstract rather than a
+   photograph of a couple.
    -------------------------------------------------------------------------- */
-export const prologue = {
-  lines: ['A Royal Celebration of Love', 'A Date With Destiny', 'When Dubai Meets Karachi'],
-  /** Shown as the film takes over. */
-  filmCue: 'And so, their celebration begins…',
+export const hero = {
+  eyebrow: 'A Royal Celebration of Love',
+  destiny: 'A Date With Destiny',
+  crossing: 'When Dubai Meets Karachi',
+  scrollCue: 'Scroll',
+  still: {
+    wide: '/stills/hero-wide.webp',
+    tall: '/stills/hero-tall.webp',
+    alt: 'Marigold garlands and candle light',
+  },
 }
 
 /* --------------------------------------------------------------------------
-   The two cities the celebration spans.
+   The two cities the celebration spans — and the one place their dates are
+   printed.
 
-   `image` is a path under public/. Leave it null and the section renders its
-   own composed plate instead, so the layout, parallax and type are already
-   final — dropping a photograph in later needs no code change.
+   `image` is a path under public/. Leave it null and the panel draws the city
+   as a fine engraved skyline instead, which is the intended design rather than
+   a placeholder: engraved line work belongs to the same world as the printed
+   invitation, where a stock photograph of a skyline does not. Setting `image`
+   swaps the engraving for the photograph and changes nothing else.
    -------------------------------------------------------------------------- */
 export const cities = [
   {
@@ -58,10 +88,10 @@ export const cities = [
     year: '2026',
     /** Read by the countdown and by <time> elements. */
     startISO: '2026-12-16T00:00:00+04:00',
+    /** Which engraving to draw. See components/site/Skyline.jsx. */
+    skyline: 'dubai',
     image: null, // e.g. '/city/dubai.webp'
     imageAlt: 'Dubai at dusk',
-    /** Drives the placeholder plate's palette until a photograph replaces it. */
-    tone: ['#1c1a24', '#3a3140', '#c9a45f'],
   },
   {
     id: 'karachi',
@@ -70,26 +100,48 @@ export const cities = [
     month: 'January',
     year: '2027',
     startISO: '2027-01-06T00:00:00+05:00',
+    skyline: 'karachi',
     image: null, // e.g. '/city/karachi.webp'
     imageAlt: 'The Karachi coastline at sunset',
-    tone: ['#1b1f22', '#33403f', '#d9bd85'],
   },
 ]
 
+/** Copy for the cities section. */
+export const celebrations = {
+  eyebrow: 'The Celebrations',
+  heading: 'When Dubai Meets Karachi',
+  /**
+   * Where that heading breaks. Each line gets its own mask and its own beat as
+   * it wipes up, so the break is a composition decision and belongs here rather
+   * than being left to whatever width the browser happens to have.
+   */
+  headingLines: ['When Dubai', 'Meets Karachi'],
+  note: 'One celebration, across two cities and two years',
+}
+
 /* --------------------------------------------------------------------------
-   The announcement itself.
+   The announcement. Typography and whitespace, nothing else.
    -------------------------------------------------------------------------- */
 export const announcement = {
   hosts: 'Younus Abdul Karim & Makia Younus',
   lead: 'Joyfully announce the',
   heading: 'Wedding Celebrations',
+  /** As above: the two words carry a beat each. */
+  headingLines: ['Wedding', 'Celebrations'],
   relation: 'Of their beloved grand daughter',
 }
 
+/**
+ * The blessing opens the hero; the verse closes the couple reveal.
+ *
+ * "Together with their families…" and "request the pleasure of your presence…"
+ * used to live here as well. Both are gone from the page: the hosts announce the
+ * wedding in their own words in the section above, and a second, more general
+ * request underneath it said the same thing twice. They are in git history if
+ * they are ever wanted back.
+ */
 export const invitation = {
   blessing: 'بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ',
-  kicker: 'Together with their families',
-  request: 'request the pleasure of your presence at the celebration of their wedding',
   verse:
     '“And among His signs is that He created for you mates from among yourselves, that you may dwell in tranquillity with them, and He has put love and mercy between your hearts.”',
   verseSource: 'Surah Ar-Rum, 30:21',
@@ -98,21 +150,23 @@ export const invitation = {
 /* --------------------------------------------------------------------------
    The countdown counts to the first day of the celebrations, in Dubai.
    Format: ISO 8601 with the timezone offset, so it is correct everywhere.
+   The date itself is not repeated here — it is set in the cities section.
    -------------------------------------------------------------------------- */
 export const weddingDate = {
   iso: cities[0].startISO,
-  weekday: 'Wednesday',
-  day: '16',
-  month: 'December',
-  year: '2026',
   /** Shown under the countdown. */
   note: 'Dubai, and then Karachi in the new year.',
 }
 
+export const countdown = {
+  eyebrow: 'Until we celebrate',
+  today: 'Today is the day',
+  note: weddingDate.note,
+}
+
 /* --------------------------------------------------------------------------
-   Events. `scene` links a card to its chapter of the film, which supplies the
-   card's still image. Dates, times and venues are not yet settled — they stay
-   null until supplied, and are never invented.
+   The three evenings, as a timeline. Dates, times and venues are not settled
+   yet, so they stay null until supplied, and are never invented.
    -------------------------------------------------------------------------- */
 export const events = [
   {
@@ -162,18 +216,19 @@ export const events = [
   },
 ]
 
+export const eventsCopy = {
+  eyebrow: 'Three Evenings',
+  heading: 'The Order of Events',
+  intro: 'Times and venues follow with the formal invitation.',
+}
+
 /** Copy used wherever a detail has not been supplied yet. */
 export const tbc = {
   short: 'To be announced',
-  long: 'Details to follow',
-}
-
-export const gallery = {
-  heading: 'Moments',
-  intro: 'Stills from our story.',
 }
 
 export const rsvp = {
+  eyebrow: 'Response Card',
   heading: 'Will you be joining us?',
   intro: 'A formal invitation will follow. Do leave us a note in the meantime.',
   deadline: null,
@@ -189,33 +244,65 @@ export const rsvp = {
   email: null,
 }
 
-export const contacts = []
+/* --------------------------------------------------------------------------
+   Where to follow along. Each entry is `null` until a real account exists —
+   the closing page omits the link rather than pointing at a dead handle.
+   -------------------------------------------------------------------------- */
+export const social = {
+  instagram: {
+    handle: '@radiawedsumar',
+    url: 'https://www.instagram.com/radiawedsumar/',
+  },
+}
 
+/**
+ * `family` and `followUp` are read by the closing page. `title` and
+ * `description` are the wording of the page's <title> and meta description —
+ * index.html is a static file and cannot import this, so those two are kept in
+ * step with it by hand.
+ */
 export const site = {
   title: 'Radia & Umar — Wedding Celebrations',
   description:
     'Younus Abdul Karim & Makia Younus joyfully announce the wedding celebrations of their beloved grand daughter Radia, with Umar. Dubai, 16–27 December 2026. Karachi, 6–8 January 2027.',
   family: 'Abdul Karim Family',
-  followUp: 'Formal invitation to follow',
-  footerNote: 'We cannot wait to celebrate with you.',
+  followUp: 'Formal Invitation to follow',
 }
 
-/** The monogram, built by `npm run logo` from brand/monogram.jpg. */
+/** The closing page. The last thing on the site, and the shortest. */
+export const closing = {
+  salutation: 'With love,',
+  family: `The ${site.family}`,
+  followUp: site.followUp,
+}
+
+/** The ambient plates. Built by `npm run stills`. */
+export const stills = {
+  chandeliers: '/stills/chandeliers.webp',
+  roses: '/stills/roses.webp',
+}
+
+/**
+ * The monogram, built by `npm run logo` from brand/monogram.jpg. `mark` is the
+ * RU cypher on its own, which is what the site uses — the names are already set
+ * in type wherever it appears. `full` is the same cypher with the names beneath
+ * it, kept for print and for anywhere the lockup has to stand alone.
+ */
 export const logo = {
   mark: '/brand/mark.webp',
   full: '/brand/logo.webp',
   alt: 'Radia & Umar',
 }
 
+/** Shown under the monogram on the preloader. */
+export const preloader = {
+  line: hero.eyebrow,
+}
+
 /* -------------------------------------------------------------------------- */
 
 export const coupleNames = couple.order.map((k) => couple[k].name)
 
+/** Used by an evening's directions link, once that evening has a `mapQuery`. */
 export const mapsUrl = (query) =>
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
-
-export const mapsEmbedUrl = (query) =>
-  `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`
-
-export const eventById = (id) => events.find((e) => e.id === id)
-export const cityById = (id) => cities.find((c) => c.id === id)

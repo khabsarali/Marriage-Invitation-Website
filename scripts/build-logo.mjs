@@ -122,9 +122,14 @@ async function main() {
     .trim({ threshold: 1 })
     .toBuffer({ resolveWithObject: true })
 
+  // 420 rather than 640: the mark is the first thing fetched on every visit —
+  // it is preloaded and it is the whole preloader — and the largest it is ever
+  // painted is about 170 CSS px, in the preloader on a wide screen. 640 at
+  // quality 92 cost 123 kB for that; this is a quarter of it and still better
+  // than 2x at every size the page uses. `logo.webp` keeps its full resolution.
   await sharp(mark.data, { raw: { width: mark.info.width, height: mark.info.height, channels: 4 } })
-    .resize({ width: 640, withoutEnlargement: true })
-    .webp({ quality: 92, alphaQuality: 100, effort: 6 })
+    .resize({ width: 420, withoutEnlargement: true })
+    .webp({ quality: 88, alphaQuality: 90, effort: 6 })
     .toFile(path.join(OUT, 'mark.webp'))
   console.log(`mark ${mark.info.width}x${mark.info.height}`)
 

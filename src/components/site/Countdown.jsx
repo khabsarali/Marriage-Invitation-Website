@@ -1,7 +1,18 @@
-import { Section, Reveal, Ornament } from './primitives.jsx'
-import { useCountdown } from '../../lib/hooks.js'
-import { weddingDate, coupleNames } from '../../config/wedding.config.js'
+import { Reveal } from './primitives.jsx'
+import { useCountdown, useParallax } from '../../lib/hooks.js'
+import { countdown, weddingDate, stills } from '../../config/wedding.config.js'
 
+/**
+ * One countdown, four numerals, no ornament.
+ *
+ * The numerals are set in the display serif at a size nothing else on the page
+ * uses, separated by hairlines rather than boxed into tiles. The date itself is
+ * not printed here — it belongs to the cities section, and the note underneath
+ * is enough to say which city comes first.
+ *
+ * The wash behind is the barat hall's chandelier light (scripts/build-stills.mjs),
+ * held far back so the numerals stay the subject.
+ */
 const UNITS = [
   { key: 'days', label: 'Days' },
   { key: 'hours', label: 'Hours' },
@@ -9,33 +20,34 @@ const UNITS = [
   { key: 'seconds', label: 'Seconds' },
 ]
 
-export default function Countdown() {
+export default function Countdown({ reducedMotion }) {
   const time = useCountdown(weddingDate.iso)
+  const washRef = useParallax({ from: -4, to: 4, disabled: reducedMotion })
 
   return (
-    <Section id="countdown" className="section--countdown" label="Countdown">
-      <Reveal as="p" className="countdown__kicker">
-        {time.passed ? 'Today is the day' : 'Counting down to the celebration'}
-      </Reveal>
+    <section className="section section--ink until" aria-label="Countdown">
+      <div className="until__wash" ref={washRef} aria-hidden="true">
+        <img src={stills.chandeliers} alt="" loading="lazy" decoding="async" />
+      </div>
 
-      <Reveal delay={60}>
-        <Ornament />
-      </Reveal>
+      <div className="section__inner until__inner">
+        <Reveal as="p" className="eyebrow eyebrow--on-dark">
+          {time.passed ? countdown.today : countdown.eyebrow}
+        </Reveal>
 
-      <Reveal className="countdown__grid" delay={120}>
-        {UNITS.map((unit) => (
-          <div className="countdown__unit" key={unit.key}>
-            <span className="countdown__value">{String(time[unit.key]).padStart(2, '0')}</span>
-            <span className="countdown__label">{unit.label}</span>
-          </div>
-        ))}
-      </Reveal>
+        <Reveal className="until__grid" delay={140}>
+          {UNITS.map((unit) => (
+            <div className="until__unit" key={unit.key}>
+              <span className="until__value">{String(time[unit.key]).padStart(2, '0')}</span>
+              <span className="until__label">{unit.label}</span>
+            </div>
+          ))}
+        </Reveal>
 
-      <Reveal as="p" className="countdown__note" delay={180}>
-        {time.passed
-          ? `${coupleNames[0]} & ${coupleNames[1]} are getting married today.`
-          : `Until ${coupleNames[0]} & ${coupleNames[1]} say “I do” on ${weddingDate.day} ${weddingDate.month} ${weddingDate.year}.`}
-      </Reveal>
-    </Section>
+        <Reveal as="p" className="until__note" delay={220}>
+          {countdown.note}
+        </Reveal>
+      </div>
+    </section>
   )
 }

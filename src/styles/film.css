@@ -1,0 +1,510 @@
+/* ==========================================================================
+   THE FILM — loader, cinematic stage, chapter rail, sound toggle.
+
+   Lifted out of global.css verbatim when the invitation was redesigned. The
+   film is off (ENABLE_3D_EXPERIENCE in src/config/scenes.config.js) and none of
+   this is on the page, so it lives with the component that needs it instead of
+   in the sheet every visitor downloads: CinematicExperience.jsx imports this
+   file, and CinematicExperience is itself loaded on demand, so these rules ship
+   only if the film is ever switched back on.
+
+   It reads --ease, --font-display, --font-script, --gold, --gold-glow,
+   --gold-light, --ivory and --stage-h from global.css, all of which are still
+   defined there.
+   ========================================================================== */
+/* ==========================================================================
+   Loader
+   ========================================================================== */
+
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(120% 90% at 50% 40%, #1d1611 0%, #0b0908 68%);
+  color: var(--ivory);
+  transition: opacity 0.9s var(--ease), visibility 0.9s;
+}
+.loader--leaving {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.loader__inner {
+  text-align: center;
+  width: min(320px, 82vw);
+}
+.loader__monogram {
+  display: block;
+  width: clamp(7rem, 26vw, 10.5rem);
+  height: auto;
+  margin-inline: auto;
+  animation: monogram-breathe 4.5s var(--ease) infinite;
+}
+.loader__text {
+  margin-top: 1.6rem;
+  font-size: 0.76rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(248, 243, 234, 0.7);
+}
+.loader__bar {
+  margin-top: 1.5rem;
+  height: 1px;
+  background: rgba(248, 243, 234, 0.18);
+  overflow: hidden;
+}
+.loader__fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 0.5s var(--ease);
+}
+.loader__percent {
+  margin-top: 0.9rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  color: rgba(248, 243, 234, 0.45);
+  font-variant-numeric: tabular-nums;
+  min-height: 1.2em;
+}
+.loader__skip {
+  margin-top: 2.4rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(248, 243, 234, 0.4);
+  border-bottom: 1px solid rgba(248, 243, 234, 0.22);
+  padding-bottom: 0.3rem;
+  transition: color 0.4s var(--ease);
+}
+.loader__skip:hover {
+  color: var(--gold-light);
+}
+
+/* The mark is an image now, so this breathes on opacity and scale — the old
+   letter-spacing tween has nothing to act on. */
+@keyframes monogram-breathe {
+  0%,
+  100% {
+    opacity: 0.62;
+    transform: scale(0.985);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ==========================================================================
+   Cinematic stage
+   ========================================================================== */
+
+/* No explicit height: ScrollTrigger's pin spacer supplies the scroll length,
+   and a fixed height here would swallow it. */
+.cinematic {
+  position: relative;
+  background: #000;
+}
+.cinematic__stage {
+  position: relative;
+  width: 100%;
+  height: var(--stage-h);
+  overflow: hidden;
+  background: #000;
+  contain: layout paint;
+}
+.cinematic__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Legibility scrim behind the chapter titles. */
+.cinematic__edge {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgba(6, 5, 4, 0.55), transparent 24%),
+    linear-gradient(to top, rgba(6, 5, 4, 0.62), transparent 34%);
+}
+
+.cinematic__captions {
+  position: absolute;
+  inset: auto 0 clamp(3.6rem, 9vh, 7rem);
+  display: grid;
+  justify-items: center;
+  pointer-events: none;
+  padding-inline: 1.5rem;
+}
+.cinematic__captions > * {
+  grid-area: 1 / 1;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  will-change: opacity, transform;
+  /* Titles have to stay readable over the brightest frames — a soft pool of
+     shade travels with the text instead of dimming the whole plate. */
+  padding: clamp(1.6rem, 4vh, 3rem) clamp(1.5rem, 5vw, 4rem);
+  background: radial-gradient(58% 120% at 50% 55%, rgba(8, 6, 5, 0.62), transparent 72%);
+}
+
+.chapter__kicker {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  margin-bottom: 0.7rem;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);
+}
+.chapter__title {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 1.6rem + 4.4vw, 5.4rem);
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: 0.06em;
+  text-shadow: 0 6px 44px rgba(0, 0, 0, 0.6);
+  margin: 0;
+}
+.chapter__subtitle {
+  margin-top: 0.7rem;
+  font-size: clamp(0.82rem, 0.78rem + 0.2vw, 0.98rem);
+  font-weight: 200;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.82);
+  max-width: 32rem;
+  text-shadow: 0 2px 22px rgba(0, 0, 0, 0.8);
+}
+
+.finale__kicker {
+  display: block;
+  font-size: 0.66rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
+}
+.finale__names {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.7rem, 2vw, 1.5rem);
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 1.4rem + 4.6vw, 5.6rem);
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: 0.05em;
+  text-shadow: 0 6px 48px rgba(0, 0, 0, 0.65);
+  margin: 0;
+  flex-wrap: wrap;
+}
+.finale__amp {
+  font-family: var(--font-script);
+  font-size: 0.7em;
+  color: var(--gold-light);
+}
+.finale__hint {
+  display: block;
+  margin-top: 1.4rem;
+  font-size: 0.64rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.rail {
+  position: absolute;
+  right: clamp(1.4rem, 3vw, 3rem);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 1rem;
+  pointer-events: none;
+}
+.rail__track {
+  position: relative;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.2);
+}
+.rail__fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--gold-light), var(--gold));
+  transform-origin: top center;
+  transform: scaleY(0);
+}
+.rail__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2.6rem;
+}
+.rail__item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  transition: opacity 0.6s var(--ease);
+  opacity: 0.4;
+}
+.rail__item[data-active='true'] {
+  opacity: 1;
+}
+.rail__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transition: background 0.6s var(--ease), box-shadow 0.6s var(--ease);
+}
+.rail__item[data-active='true'] .rail__dot {
+  background: var(--gold-light);
+  box-shadow: 0 0 12px var(--gold-glow);
+}
+.rail__label {
+  font-size: 0.6rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+}
+
+.cinematic__hint {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(1.4rem, 4vh, 2.6rem);
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  gap: 0.8rem;
+  pointer-events: none;
+}
+.cinematic__hint-text {
+  font-size: 0.62rem;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.9);
+}
+.cinematic__hint-line {
+  width: 1px;
+  height: 42px;
+  background: linear-gradient(180deg, var(--gold-light), transparent);
+  animation: hint-drop 2.6s var(--ease) infinite;
+}
+@keyframes hint-drop {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+    opacity: 0;
+  }
+  40% {
+    transform: scaleY(1);
+    transform-origin: top;
+    opacity: 1;
+  }
+  70% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+    opacity: 0;
+  }
+}
+
+.cinematic__skip {
+  position: absolute;
+  top: clamp(1.1rem, 3vh, 2rem);
+  right: clamp(1.1rem, 3vw, 2.2rem);
+  z-index: 3;
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+  backdrop-filter: blur(6px);
+  transition: color 0.4s var(--ease), border-color 0.4s var(--ease), background 0.4s var(--ease);
+}
+.cinematic__skip:hover {
+  color: #fff;
+  border-color: var(--gold-light);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Music toggle. Sits opposite the skip button and borrows its shape, so the
+   two controls read as a pair rather than as two unrelated affordances.
+   Fixed, not absolute: the stage is pinned, and this outlives a scroll. */
+.soundtoggle {
+  position: fixed;
+  top: clamp(1.1rem, 3vh, 2rem);
+  left: clamp(1.1rem, 3vw, 2.2rem);
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 0.5rem 1rem 0.5rem 0.85rem;
+  backdrop-filter: blur(6px);
+  transition: color 0.4s var(--ease), border-color 0.4s var(--ease), background 0.4s var(--ease);
+}
+.soundtoggle:hover {
+  color: #fff;
+  border-color: var(--gold-light);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Four bars that dance while the score is playing and lie flat when it is not,
+   so the state is legible without a word being read. */
+.soundtoggle__bars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 0.72rem;
+}
+.soundtoggle__bars i {
+  display: block;
+  width: 2px;
+  height: 22%;
+  border-radius: 1px;
+  background: currentColor;
+  transition: height 0.35s var(--ease);
+}
+.soundtoggle__bars[data-playing='true'] i {
+  animation: sound-bar 1.1s ease-in-out infinite;
+}
+.soundtoggle__bars[data-playing='true'] i:nth-child(2) {
+  animation-delay: 0.22s;
+}
+.soundtoggle__bars[data-playing='true'] i:nth-child(3) {
+  animation-delay: 0.44s;
+}
+.soundtoggle__bars[data-playing='true'] i:nth-child(4) {
+  animation-delay: 0.13s;
+}
+@keyframes sound-bar {
+  0%,
+  100% {
+    height: 26%;
+  }
+  50% {
+    height: 100%;
+  }
+}
+
+/* Development only — CinematicExperience renders this behind import.meta.env.DEV,
+   so it is stripped from the production bundle rather than merely hidden. */
+.cinematic__debug {
+  position: absolute;
+  left: 50%;
+  bottom: 0.5rem;
+  transform: translateX(-50%);
+  z-index: 8;
+  max-width: calc(100% - 1rem);
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #7CFFB2;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.cinematic__veil {
+  position: absolute;
+  inset: 0;
+  background: var(--ivory);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Responsive — the film only
+   ========================================================================== */
+
+@media (max-width: 760px) {
+  .rail {
+    display: none;
+  }
+  .cinematic__captions {
+    inset: auto 0 clamp(5rem, 14vh, 8rem);
+  }
+  .chapter__subtitle {
+    max-width: 22rem;
+  }
+  /* The bars alone carry the state; the label is what the screen reader gets. */
+  .soundtoggle__label {
+    display: none;
+  }
+  .soundtoggle {
+    padding: 0.55rem 0.7rem;
+  }
+}
+
+/* Portrait phones.
+
+   The phone is served its own 9:16 render, punched in to reach the edges of
+   the screen, so the plate is full bleed — there is no longer a letterboxed
+   band with clear space under it to set the titles in. The chapter titles go
+   back over the image, low in the frame where that artwork keeps its floor:
+   the couple stands mid-frame with headroom above and floor below, so the
+   bottom sixth is the quietest part of every shot.
+
+   The scrim carries the legibility instead of the empty space, so it is
+   weighted harder at the foot of the frame than the desktop version. */
+@media (orientation: portrait) and (max-width: 860px) {
+  .cinematic__captions {
+    inset: auto 0 clamp(4rem, 11vh, 7.5rem);
+  }
+  .cinematic__edge {
+    background:
+      linear-gradient(to bottom, rgba(6, 5, 4, 0.42), transparent 16%),
+      linear-gradient(to top, rgba(6, 5, 4, 0.82), rgba(6, 5, 4, 0.36) 26%, transparent 52%);
+  }
+  .chapter__title {
+    font-size: clamp(2.4rem, 1.4rem + 6vw, 3.6rem);
+  }
+  .finale__names {
+    font-size: clamp(2.2rem, 1.2rem + 6vw, 3.4rem);
+  }
+  .cinematic__hint {
+    bottom: clamp(1rem, 3vh, 2rem);
+  }
+  .cinematic__skip {
+    font-size: 0.56rem;
+    letter-spacing: 0.16em;
+    padding: 0.5rem 0.9rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The bars are frozen by the global reduced-motion rule, so hold them at a
+     height that still reads as "playing" rather than collapsed to muted. */
+  .soundtoggle__bars[data-playing='true'] i {
+    height: 72%;
+  }
+}
