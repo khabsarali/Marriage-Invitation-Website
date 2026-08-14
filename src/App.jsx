@@ -17,7 +17,6 @@ import Prologue from './components/site/Prologue.jsx'
 import Hero from './components/site/Hero.jsx'
 import Countdown from './components/site/Countdown.jsx'
 import Events from './components/site/Events.jsx'
-import Venue from './components/site/Venue.jsx'
 import Couple from './components/site/Couple.jsx'
 import Rsvp from './components/site/Rsvp.jsx'
 import Footer from './components/site/Footer.jsx'
@@ -323,7 +322,10 @@ export default function App() {
           <Hero />
           <Countdown />
           <Events />
-          <Venue />
+          {/* The Dubai/Karachi venue block is out: the two cities and their
+              dates already carry the prologue as full-height plates, and
+              repeating them here read as a duplicate. Venue.jsx is kept for
+              when real venues and a directions link exist. */}
           <Couple />
           <Rsvp />
           <Footer />

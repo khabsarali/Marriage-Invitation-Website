@@ -3,7 +3,6 @@ import { logo } from '../../config/wedding.config.js'
 const LINKS = [
   { href: '#invitation', label: 'Invitation' },
   { href: '#events', label: 'Events' },
-  { href: '#venue', label: 'Venue' },
   { href: '#couple', label: 'Couple' },
   { href: '#rsvp', label: 'RSVP' },
 ]
