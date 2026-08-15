@@ -12,7 +12,13 @@ import Countdown from './components/site/Countdown.jsx'
 import Rsvp from './components/site/Rsvp.jsx'
 import Closing from './components/site/Closing.jsx'
 
+import Booking from './components/pages/Booking.jsx'
+import Location from './components/pages/Location.jsx'
+import Contact from './components/pages/Contact.jsx'
+import RsvpPage from './components/pages/RsvpPage.jsx'
+
 import { useDeviceProfile, usePrefersReducedMotion } from './lib/hooks.js'
+import { useRoute } from './lib/router.js'
 import { ENABLE_3D_EXPERIENCE } from './config/scenes.config.js'
 import { hero as heroConfig } from './config/wedding.config.js'
 
@@ -58,19 +64,85 @@ function useStableViewportHeight() {
   }, [])
 }
 
+/**
+ * The invitation itself: unchanged, and still the whole of `/`.
+ *
+ * It is a component now only so the router has something to switch against —
+ * the sections, their order and their props are exactly as they were.
+ */
+function Invitation({ filmEnabled, isMobile, reducedMotion }) {
+  return (
+    <>
+      <Hero reducedMotion={reducedMotion} />
+
+      {filmEnabled && (
+        <Suspense fallback={null}>
+          <FilmStage isMobile={isMobile} reducedMotion={reducedMotion} />
+        </Suspense>
+      )}
+
+      <Crossing reducedMotion={reducedMotion} />
+      <Announcement />
+      <CoupleReveal />
+      <Events />
+      <Countdown reducedMotion={reducedMotion} />
+      <Rsvp />
+      <Closing reducedMotion={reducedMotion} />
+    </>
+  )
+}
+
+const PAGES = {
+  '/booking': Booking,
+  '/location': Location,
+  '/contact': Contact,
+  '/rsvp': RsvpPage,
+}
+
 export default function App() {
   const { isMobile } = useDeviceProfile()
   const reducedMotion = usePrefersReducedMotion()
   useStableViewportHeight()
 
+  const route = useRoute()
+  const isHome = route.path === '/'
+  const Page = PAGES[route.path]
+
   const filmEnabled = ENABLE_3D_EXPERIENCE
-  const [opened, setOpened] = useState(false)
+  // The envelope opens onto the invitation and waits for the invitation's own
+  // plate, so it belongs to `/` alone: a guest who lands on /booking is already
+  // past the door.
+  const [opened, setOpened] = useState(() => !isHome)
   const onOpened = useCallback(() => setOpened(true), [])
 
   // The portrait crop is what a phone will actually paint with, so that is the
   // one the preloader waits for — waiting on the landscape file would hold the
   // page for an image the visitor never sees.
   const heroBackdrop = isMobile ? heroConfig.backdrop.tall : heroConfig.backdrop.wide
+
+  /* ------------------------------------------------------------------ routing */
+
+  // `.page` is transparent until it is open, and only the invitation has an
+  // envelope to open it — so a page opens itself.
+  useEffect(() => {
+    if (!isHome) setOpened(true)
+  }, [isHome])
+
+  // Every navigation starts at the top, except one asking for a section of the
+  // invitation by name, which lands on that section instead.
+  useEffect(() => {
+    if (!opened) return
+    const target = isHome && route.hash ? document.querySelector(route.hash) : null
+    if (!target) {
+      window.scrollTo(0, 0)
+      window.lenis?.scrollTo(0, { immediate: true })
+      return
+    }
+    requestAnimationFrame(() => {
+      if (window.lenis) window.lenis.scrollTo(target, { offset: -10, duration: 1.3 })
+      else target.scrollIntoView({ behavior: 'smooth' })
+    })
+  }, [route.path, route.hash, isHome, opened])
 
   /* -------------------------------------------------- scroll lock + smoothing */
 
@@ -114,26 +186,18 @@ export default function App() {
 
   return (
     <>
-      {!opened && <Preloader heroSrc={heroBackdrop} onDone={onOpened} />}
+      {isHome && !opened && <Preloader heroSrc={heroBackdrop} onDone={onOpened} />}
 
       <Nav />
 
-      <main className={`page${opened ? ' is-open' : ''}`}>
-        <Hero reducedMotion={reducedMotion} />
-
-        {filmEnabled && (
-          <Suspense fallback={null}>
-            <FilmStage isMobile={isMobile} reducedMotion={reducedMotion} />
-          </Suspense>
+      {/* Keyed on the route so a page mounts fresh — its reveals run again, and
+          the fade is a real entrance rather than a swap of contents. */}
+      <main className={`page${opened ? ' is-open' : ''}`} key={route.path}>
+        {isHome ? (
+          <Invitation filmEnabled={filmEnabled} isMobile={isMobile} reducedMotion={reducedMotion} />
+        ) : (
+          Page && <Page />
         )}
-
-        <Crossing reducedMotion={reducedMotion} />
-        <Announcement />
-        <CoupleReveal />
-        <Events />
-        <Countdown reducedMotion={reducedMotion} />
-        <Rsvp />
-        <Closing reducedMotion={reducedMotion} />
       </main>
     </>
   )

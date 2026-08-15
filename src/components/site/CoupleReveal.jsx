@@ -9,21 +9,24 @@ import { couple, coupleNames, invitation } from '../../config/wedding.config.js'
  * alone, and the verse sits underneath at a fraction of their size, which is
  * what keeps them the loudest thing here.
  *
- * A photograph would go between the names and the verse. There is none: see the
- * note on `couple.bride.image` in wedding.config.js. Set a path there and this
- * renders it; until then the section is type, which is a deliberate choice
- * rather than a gap — a wedding invitation with no photograph on it is normal,
- * and one with the wrong photograph on it is not.
+ * The two portraits sit between the names and the verse — the one place on the
+ * site they appear, and the only photographs of the couple anywhere in it. Both
+ * are cut to the same 4:5 frame by `npm run portraits` so they read as a pair
+ * rather than as two photographs that happen to be adjacent. They carry no
+ * captions: the names are set at full scale directly above them.
+ *
+ * Either path can go back to null — see `couple.bride.image` in
+ * wedding.config.js — and that side of the pair simply stops rendering.
  */
-function Portrait({ person }) {
+function Portrait({ person, delay }) {
   if (!person.image) return null
   return (
-    <Reveal className="couple__frame" delay={200}>
+    <Reveal className="couple__frame" delay={delay}>
       <img
         src={person.image}
         alt={person.fullName}
-        width="672"
-        height="840"
+        width="720"
+        height="900"
         loading="lazy"
         decoding="async"
       />
@@ -59,8 +62,12 @@ export default function CoupleReveal() {
           </Reveal>
         )}
 
-        <Portrait person={first} />
-        <Portrait person={second} />
+        {(first.image || second.image) && (
+          <div className="couple__pair">
+            <Portrait person={first} delay={200} />
+            <Portrait person={second} delay={340} />
+          </div>
+        )}
 
         <figure className="couple__verse">
           <Reveal as="blockquote" delay={1000}>

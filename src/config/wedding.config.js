@@ -22,24 +22,19 @@ export const couple = {
     parents: null,
     words: null,
     /**
-     * A photograph for the couple reveal.
-     *
-     * Deliberately null. The one portrait in the project is a professional
-     * headshot in a doctor's coat — a lovely photograph, and the wrong one for
-     * a wedding invitation, where it fights the type rather than joining it.
-     * The reveal is set in type alone until real engagement or wedding
-     * photography exists, at which point a path here is all it takes:
-     * `image: '/portraits/radia.webp'`.
+     * The portrait in the couple section, on the homepage and nowhere else.
+     * Both are cut to one 4:5 frame by `npm run portraits` — see
+     * scripts/build-portraits.mjs. Set either to null and that side of the
+     * pair simply does not render.
      */
-    image: null,
+    image: '/portraits/radia-portrait.webp',
   },
   groom: {
     name: 'Umar',
     fullName: 'Umar',
     parents: null,
     words: null,
-    // No photograph supplied yet. Nothing stands in for it.
-    image: null,
+    image: '/portraits/umar-portrait.webp',
   },
   /** Order the names appear as — matches the RU monogram. */
   order: ['bride', 'groom'],
@@ -236,7 +231,14 @@ export const rsvp = {
   heading: 'Will you be joining us?',
   intro: 'A formal invitation will follow. Do leave us a note in the meantime.',
   deadline: null,
-  maxGuests: 8,
+  /**
+   * Two, and the form has no way to say otherwise: an invitation admits the
+   * person it is addressed to and one guest. Both the response card on the
+   * homepage and the full one at /rsvp read this, so the cap cannot drift
+   * between them.
+   */
+  minGuests: 1,
+  maxGuests: 2,
   /**
    * Where the form is delivered.
    *   endpoint  — optional POST url (Formspree, Getform, Basin, your own API…).
@@ -246,6 +248,113 @@ export const rsvp = {
   endpoint: null,
   whatsapp: null,
   email: null,
+}
+
+/**
+ * The full response card at /rsvp. The short one on the homepage keeps its own
+ * wording above; this is the page a guest is sent to.
+ *
+ * `celebrations` is which evening-city they are answering for. The two cities
+ * are not spelled out again — they are read from `cities` — so adding a third
+ * city would add a third option here without this file being touched twice.
+ */
+export const rsvpPage = {
+  eyebrow: 'Kindly Respond',
+  heading: 'We would be honoured to celebrate with you',
+  headingLines: ['We would be honoured', 'to celebrate with you'],
+  intro: 'Please reply for yourself and, if your invitation includes one, a single guest.',
+  thanks: {
+    heading: 'Thank you',
+    line: 'Your presence will make the celebration even more special.',
+    declined: 'Thank you for letting us know. You will be in our thoughts on both evenings.',
+  },
+  /** Appended to the two cities. null would drop it. */
+  bothLabel: 'Both',
+}
+
+/* --------------------------------------------------------------------------
+   Your stay — the booking page at /booking.
+
+   Nothing here is invented. Every field is null until the family has actually
+   held rooms somewhere, and the page prints "To be announced" in its place,
+   exactly as the three evenings do. Fill a value in and it appears; set
+   `bookingUrl` or `phone` and the button beneath that hotel turns on.
+
+   `cityId` ties a hotel to its city in `cities` above, which is where the name
+   and the dates come from — they are not written twice.
+   -------------------------------------------------------------------------- */
+export const stay = {
+  eyebrow: 'Your Stay',
+  heading: 'A place to rest, gather & celebrate',
+  headingLines: ['A place to rest,', 'gather & celebrate'],
+  intro:
+    'Rooms are being held for guests travelling to us. Details for each city follow with the formal invitation.',
+  hotels: [
+    {
+      cityId: 'dubai',
+      name: null,
+      address: null,
+      checkIn: null,
+      checkOut: null,
+      rooms: null,
+      distance: null,
+      /** A real booking page. null and the button is not rendered. */
+      bookingUrl: null,
+      phone: null,
+    },
+    {
+      cityId: 'karachi',
+      name: null,
+      address: null,
+      checkIn: null,
+      checkOut: null,
+      rooms: null,
+      distance: null,
+      bookingUrl: null,
+      phone: null,
+    },
+  ],
+}
+
+/* --------------------------------------------------------------------------
+   Where — the location page at /location.
+
+   As above: a venue is never guessed, and the map button only exists once
+   `mapQuery` does. The dates come from `cities`; only what is new to this page
+   is set here.
+   -------------------------------------------------------------------------- */
+export const venues = {
+  eyebrow: 'Location',
+  heading: 'Where we will celebrate',
+  headingLines: ['Where we', 'will celebrate'],
+  intro: 'Addresses and arrival times follow with the formal invitation.',
+  places: [
+    { cityId: 'dubai', venue: null, address: null, time: null, mapQuery: null },
+    { cityId: 'karachi', venue: null, address: null, time: null, mapQuery: null },
+  ],
+}
+
+/* --------------------------------------------------------------------------
+   Contact — the page at /contact.
+
+   Each channel is null until it is real. A card with nothing in it still
+   prints its label and says the detail is to follow; what it will not do is
+   render a button that dials nowhere.
+   -------------------------------------------------------------------------- */
+export const contact = {
+  eyebrow: 'Contact',
+  heading: 'We are here to help',
+  headingLines: ['We are here', 'to help'],
+  intro: 'For anything at all — travel, rooms, or a question about an evening.',
+  coordinator: {
+    role: 'Wedding Coordinator',
+    name: null,
+    /** Dialled as-is. International format, e.g. '+971 50 000 0000'. */
+    phone: null,
+    /** Digits only, international format, e.g. '971500000000'. */
+    whatsapp: null,
+    email: null,
+  },
 }
 
 /* --------------------------------------------------------------------------
@@ -310,3 +419,6 @@ export const coupleNames = couple.order.map((k) => couple[k].name)
 /** Used by an evening's directions link, once that evening has a `mapQuery`. */
 export const mapsUrl = (query) =>
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
+
+/** A city by id, for the pages that hang their content off `cities`. */
+export const cityById = (id) => cities.find((city) => city.id === id)

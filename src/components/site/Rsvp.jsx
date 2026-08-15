@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Reveal, MaskLines, Rule } from './primitives.jsx'
-import { rsvp as rsvpConfig, coupleNames } from '../../config/wedding.config.js'
+import { rsvp as rsvpConfig } from '../../config/wedding.config.js'
+import { deliver, guestOptions, mailHref, summarise, whatsappHref } from '../../lib/rsvp.js'
 
 /**
  * The response card.
@@ -13,27 +14,13 @@ import { rsvp as rsvpConfig, coupleNames } from '../../config/wedding.config.js'
  * Fields are ruled lines rather than boxes, which is what a card looks like and
  * happens to be far less furniture on the page.
  *
- * Delivery is unchanged: POST to `endpoint` when one is configured, keep a copy
- * in localStorage either way, and offer WhatsApp and email as the fallback.
- * With all three unset the reply is still acknowledged and stored, so the form
- * is never a dead end while the family decides where replies should go.
+ * Delivery lives in lib/rsvp.js, shared with the full response card at /rsvp so
+ * the two can never drift: POST to `endpoint` when one is configured, keep a
+ * copy in localStorage either way, and offer WhatsApp and email as the
+ * fallback. With all three unset the reply is still acknowledged and stored, so
+ * the form is never a dead end while the family decides where replies go.
  */
-const STORAGE_KEY = 'wedding-rsvp'
-
 const emptyForm = { name: '', attending: '', guests: 1, message: '' }
-
-/** A readable one-message summary, used for the WhatsApp / email handoff. */
-function summarise(form) {
-  const lines = [
-    `RSVP for ${coupleNames[0]} & ${coupleNames[1]}`,
-    `Name: ${form.name}`,
-    form.attending === 'yes'
-      ? `Attending: Joyfully — ${form.guests} ${form.guests === 1 ? 'guest' : 'guests'}`
-      : 'Attending: Regretfully unable',
-  ]
-  if (form.message.trim()) lines.push(`Message: ${form.message.trim()}`)
-  return lines.join('\n')
-}
 
 export default function Rsvp() {
   const [form, setForm] = useState(emptyForm)
@@ -43,14 +30,8 @@ export default function Rsvp() {
   const set = (patch) => setForm((f) => ({ ...f, ...patch }))
   const summary = useMemo(() => summarise(form), [form])
 
-  const whatsappHref = rsvpConfig.whatsapp
-    ? `https://wa.me/${rsvpConfig.whatsapp}?text=${encodeURIComponent(summary)}`
-    : null
-  const mailHref = rsvpConfig.email
-    ? `mailto:${rsvpConfig.email}?subject=${encodeURIComponent(
-        `RSVP — ${form.name || 'Wedding'}`
-      )}&body=${encodeURIComponent(summary)}`
-    : null
+  const whatsapp = whatsappHref(summary)
+  const mail = mailHref(summary, form.name)
 
   const submit = async (e) => {
     e.preventDefault()
@@ -65,22 +46,9 @@ export default function Rsvp() {
 
     setError('')
     setStatus('sending')
-    const payload = { ...form, submittedAt: new Date().toISOString() }
 
     try {
-      if (rsvpConfig.endpoint) {
-        const res = await fetch(rsvpConfig.endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify(payload),
-        })
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      }
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
-      } catch {
-        /* private browsing — the reply still went through */
-      }
+      await deliver(form)
       setStatus('done')
     } catch {
       setStatus('error')
@@ -103,17 +71,17 @@ export default function Rsvp() {
                 : 'Thank you for letting us know. You will be in our thoughts on the day.'}
             </p>
 
-            {(whatsappHref || mailHref) && (
+            {(whatsapp || mail) && (
               <div className="rsvp__handoff">
                 <p>Please also send us your reply so we have it on record:</p>
                 <div className="rsvp__actions">
-                  {whatsappHref && (
-                    <a className="btn" href={whatsappHref} target="_blank" rel="noopener noreferrer">
+                  {whatsapp && (
+                    <a className="btn" href={whatsapp} target="_blank" rel="noopener noreferrer">
                       Send on WhatsApp
                     </a>
                   )}
-                  {mailHref && (
-                    <a className="btn btn--quiet" href={mailHref}>
+                  {mail && (
+                    <a className="btn btn--quiet" href={mail}>
                       Send by email
                     </a>
                   )}
@@ -193,7 +161,7 @@ export default function Rsvp() {
                 value={form.guests}
                 onChange={(e) => set({ guests: Number(e.target.value) })}
               >
-                {Array.from({ length: rsvpConfig.maxGuests }, (_, i) => i + 1).map((n) => (
+                {guestOptions().map((n) => (
                   <option key={n} value={n}>
                     {n} {n === 1 ? 'guest' : 'guests'}
                   </option>

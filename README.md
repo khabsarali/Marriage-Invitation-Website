@@ -30,6 +30,7 @@ npm run frames     # one-off: turns the source PNGs into optimised web assets
 npm run logo       # one-off: keys the monogram off its card and cuts favicons
 npm run stills     # one-off: builds the ambient plates the page paints with
 npm run backdrop   # one-off: cuts the hero's photograph to its two crops
+npm run portraits  # one-off: cuts the couple's two portraits to one frame
 npm run dev
 ```
 
@@ -48,17 +49,73 @@ Anything not yet settled is `null` rather than guessed — the three evenings ha
 no dates, times or venues, so they read "To be announced". Fill a value in and
 it appears; nothing else has to change. The same is true of photography: set
 `cities[].image` and that city's engraving becomes a photograph, or set
-`couple.bride.image` and the couple reveal gains a portrait.
+`couple.bride.image` to null and that half of the couple's portrait pair stops
+rendering.
+
+**The four information pages are filled in the same way, and nothing on them is
+invented.** Every hotel, venue, address and phone number is `null` today, so
+each line reads "To be announced" and the buttons beneath it are simply not
+rendered — a booking link that goes nowhere is worse than no button.
+
+| Fill this in | And this appears |
+|---|---|
+| `stay.hotels[].name` / `.address` / `.checkIn` / `.checkOut` / `.rooms` / `.distance` | the details on `/booking` |
+| `stay.hotels[].bookingUrl` / `.phone` | the **Book a room** / **Call the hotel** buttons |
+| `venues.places[].venue` / `.address` / `.time` | the details on `/location` |
+| `venues.places[].mapQuery` | the **View on map** button, in place of "Map to follow" |
+| `contact.coordinator.name` / `.phone` / `.whatsapp` / `.email` | the card and the **Call** / **WhatsApp** / **Email** buttons on `/contact` |
+
+Each hotel and venue is tied to a city by `cityId`, and the city's name and dates
+are read from `cities` — they are not written out a second time.
 
 The RSVP form works without a backend: it validates, stores the reply locally
 and hands off to WhatsApp or email once `rsvp.whatsapp` / `rsvp.email` are set.
 If you would rather collect replies centrally, set `rsvp.endpoint` to a form
 endpoint (Formspree, Getform, Basin, your own API) and the form will `POST` JSON
-to it as well.
+to it as well. Both response cards — the short one on the invitation and the
+full one at `/rsvp` — share that delivery ([`src/lib/rsvp.js`](src/lib/rsvp.js)),
+so they cannot drift apart.
+
+`rsvp.minGuests` and `rsvp.maxGuests` are **1 and 2**: an invitation admits the
+person it is addressed to and one guest. The picker offers exactly those two
+counts and the value is clamped to the same range before delivery, so a number
+put into the payload by hand cannot get past it either. Raise `maxGuests` and
+both forms widen together.
 
 The film's pacing, grading and chapter titles live in
 [`src/config/scenes.config.js`](src/config/scenes.config.js), along with the
 switch that turns it on.
+
+---
+
+## The five pages
+
+The invitation is one long scroll at `/`. Behind it are four short pages that
+answer the practical questions, so that none of them has to interrupt it.
+
+| | |
+|---|---|
+| `/` | the invitation — hero, cities, announcement, couple, evenings, countdown, response card, closing |
+| `/booking` | Your Stay — one plate per city |
+| `/location` | where, and the map buttons |
+| `/contact` | the coordinator's card |
+| `/rsvp` | the full response card |
+
+Routing is [`src/lib/router.js`](src/lib/router.js) — about sixty lines over the
+History API, with no dependency, because deciding between five strings does not
+need a library. An unknown path resolves to the invitation rather than to a 404:
+a wedding invitation that greets a mistyped URL with an error is worse than one
+that quietly shows the invitation.
+
+The four pages share one ground — the night blue of the hero photograph rather
+than the invitation's warm onyx — and carry no photography at all. **The
+couple's portraits appear on the invitation and nowhere else.**
+
+> **Deploying:** these are real paths, so the host has to answer `/booking` with
+> `index.html`. [`public/_redirects`](public/_redirects) covers Netlify and
+> Cloudflare Pages. Vercel wants a rewrite in `vercel.json`; GitHub Pages wants a
+> copy of `index.html` named `404.html`. Without one of those, a guest who
+> refreshes on `/booking` gets the host's 404.
 
 ---
 

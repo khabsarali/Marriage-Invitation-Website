@@ -1,25 +1,34 @@
 import { useEffect, useState } from 'react'
 import { logo } from '../../config/wedding.config.js'
 import { useScrolledPast } from '../../lib/hooks.js'
+import { navigate, useRoute } from '../../lib/router.js'
 
 /**
- * Five words and a monogram.
+ * Seven words and a monogram.
  *
  * Over the hero it is light and has no ground of its own; once the page has
  * scrolled past the hero it settles onto paper and turns to ink. On phones the
- * links collapse into a full-screen sheet, because five tracked labels across a
- * 360px screen is a row of unreadable stubs.
+ * links collapse into a full-screen sheet, because seven tracked labels across
+ * a 360px screen is a row of unreadable stubs.
+ *
+ * Two kinds of link, one list. `hash` scrolls to a section of the invitation;
+ * `to` is a page of its own. From a page, a hash link is not a scroll but a
+ * journey home to that section — which is why `go` checks where it is standing
+ * before deciding what to do.
  */
 const LINKS = [
-  { href: '#invitation', label: 'Invitation' },
-  { href: '#celebrations', label: 'Celebration' },
-  { href: '#couple', label: 'Couple' },
-  { href: '#events', label: 'Events' },
-  { href: '#rsvp', label: 'RSVP' },
+  { hash: '#invitation', label: 'Invitation' },
+  { hash: '#celebrations', label: 'Celebration' },
+  { hash: '#couple', label: 'Couple' },
+  { hash: '#events', label: 'Events' },
+  { to: '/booking', label: 'Booking' },
+  { to: '/location', label: 'Location' },
+  { to: '/rsvp', label: 'RSVP' },
 ]
 
 export default function Nav() {
   const settled = useScrolledPast(140)
+  const route = useRoute()
   const [open, setOpen] = useState(false)
 
   // The sheet covers the page, so the page must not scroll behind it. Lenis is
@@ -42,10 +51,22 @@ export default function Nav() {
     return () => window.removeEventListener('keydown', onKey)
   }, [open])
 
-  const go = (e, href) => {
+  const go = (e, link) => {
     e.preventDefault()
     setOpen(false)
-    const target = document.querySelector(href)
+
+    if (link.to) {
+      navigate(link.to)
+      return
+    }
+    // A section of the invitation, asked for from somewhere else: go home, and
+    // let the invitation scroll to it once it has mounted.
+    if (route.path !== '/') {
+      navigate(`/${link.hash}`)
+      return
+    }
+
+    const target = document.querySelector(link.hash)
     if (!target) return
     // The sheet closes on the same tick, so the scroll waits a frame for the
     // body lock to lift — otherwise the jump lands short.
@@ -55,18 +76,25 @@ export default function Nav() {
     })
   }
 
+  const href = (link) => link.to ?? link.hash
+  const isCurrent = (link) => (link.to ? route.path === link.to : false)
+
   return (
     <>
       <header className={`nav${settled ? ' is-settled' : ''}${open ? ' is-open' : ''}`}>
-        <a className="nav__mark" href="#invitation" onClick={(e) => go(e, '#invitation')}>
+        <a className="nav__mark" href="/" onClick={(e) => go(e, { hash: '#invitation' })}>
           <img src={logo.mark} alt={logo.alt} width="420" height="392" />
         </a>
 
         <nav className="nav__links" aria-label="Sections">
           <ul>
             {LINKS.map((link) => (
-              <li key={link.href}>
-                <a href={link.href} onClick={(e) => go(e, link.href)}>
+              <li key={link.label}>
+                <a
+                  href={href(link)}
+                  onClick={(e) => go(e, link)}
+                  aria-current={isCurrent(link) ? 'page' : undefined}
+                >
                   {link.label}
                 </a>
               </li>
@@ -100,8 +128,13 @@ export default function Nav() {
         <nav aria-label="Sections">
           <ul className="sheet__list">
             {LINKS.map((link, i) => (
-              <li key={link.href} style={{ transitionDelay: `${120 + i * 70}ms` }}>
-                <a href={link.href} onClick={(e) => go(e, link.href)} tabIndex={open ? 0 : -1}>
+              <li key={link.label} style={{ transitionDelay: `${120 + i * 70}ms` }}>
+                <a
+                  href={href(link)}
+                  onClick={(e) => go(e, link)}
+                  tabIndex={open ? 0 : -1}
+                  aria-current={isCurrent(link) ? 'page' : undefined}
+                >
                   {link.label}
                 </a>
               </li>

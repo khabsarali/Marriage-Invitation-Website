@@ -1,0 +1,8 @@
+# The site has five real paths — /, /booking, /location, /contact, /rsvp — and
+# one HTML file. Without this, a guest who refreshes on /booking, or opens a
+# link to it, gets the host's 404 instead of the page.
+#
+# Netlify and Cloudflare Pages read this file. Vercel needs a rewrite in
+# vercel.json; GitHub Pages needs a copy of index.html named 404.html. See the
+# README.
+/*  /index.html  200
