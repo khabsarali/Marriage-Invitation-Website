@@ -12,10 +12,14 @@ import Countdown from './components/site/Countdown.jsx'
 import Rsvp from './components/site/Rsvp.jsx'
 import Closing from './components/site/Closing.jsx'
 
+import Services from './components/site/Services.jsx'
+
 import Booking from './components/pages/Booking.jsx'
 import Location from './components/pages/Location.jsx'
 import Contact from './components/pages/Contact.jsx'
 import RsvpPage from './components/pages/RsvpPage.jsx'
+import MakeupHair from './components/pages/MakeupHair.jsx'
+import Shuttle from './components/pages/Shuttle.jsx'
 
 import { useDeviceProfile, usePrefersReducedMotion } from './lib/hooks.js'
 import { useRoute } from './lib/router.js'
@@ -85,6 +89,9 @@ function Invitation({ filmEnabled, isMobile, reducedMotion }) {
       <Announcement />
       <CoupleReveal />
       <Events />
+      {/* The one addition to the invitation: two doors out to the service
+          pages, between the order of events and the countdown. */}
+      <Services />
       <Countdown reducedMotion={reducedMotion} />
       <Rsvp />
       <Closing reducedMotion={reducedMotion} />
@@ -97,6 +104,8 @@ const PAGES = {
   '/location': Location,
   '/contact': Contact,
   '/rsvp': RsvpPage,
+  '/makeup-hair': MakeupHair,
+  '/shuttle': Shuttle,
 }
 
 export default function App() {

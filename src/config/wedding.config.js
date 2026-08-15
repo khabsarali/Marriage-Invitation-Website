@@ -358,6 +358,101 @@ export const contact = {
 }
 
 /* --------------------------------------------------------------------------
+   Makeup & hair — the page at /makeup-hair.
+
+   Two services, side by side, each carrying the same four lines. No salon, no
+   artist, no price and no number is invented: every field is null until the
+   family has actually engaged someone, and the page says so in the
+   invitation's own voice until then.
+   -------------------------------------------------------------------------- */
+export const beauty = {
+  eyebrow: 'Makeup & Hair',
+  heading: 'Prepare beautifully for the celebration',
+  headingLines: ['Prepare beautifully', 'for the celebration'],
+  intro:
+    'Artists are being arranged for guests who would like them. Tell us what you need and we will come back to you with times.',
+  services: [
+    {
+      id: 'makeup',
+      name: 'Makeup',
+      /** A line about what is offered. null and it reads "To be announced". */
+      offering: null,
+      availability: null,
+      location: null,
+      booking: null,
+    },
+    {
+      id: 'hair',
+      name: 'Hair',
+      offering: null,
+      availability: null,
+      location: null,
+      booking: null,
+    },
+  ],
+  request: {
+    eyebrow: 'Request a service',
+    heading: 'Tell us what you would like',
+    /** The three things that can be asked for. Order is the order shown. */
+    options: ['Makeup', 'Hair', 'Makeup + Hair'],
+  },
+}
+
+/* --------------------------------------------------------------------------
+   The shuttle — the page at /shuttle.
+
+   One plate per city, four lines each, and a seat reservation that admits the
+   same one or two people the invitation does. Pickup points and times are not
+   guessed.
+   -------------------------------------------------------------------------- */
+export const shuttle = {
+  eyebrow: 'Shuttle Service',
+  heading: 'Travel with ease',
+  headingLines: ['Travel with ease'],
+  /** The one thing this page is certain of, and it is set here only. */
+  statement: 'Shuttle service will be provided for our guests.',
+  intro: 'Pickup points and departure times follow with the formal invitation.',
+  routes: [
+    { cityId: 'dubai', pickup: null, departure: null, venue: null, returnRun: null },
+    { cityId: 'karachi', pickup: null, departure: null, venue: null, returnRun: null },
+  ],
+  reserve: {
+    eyebrow: 'Reserve your seat',
+    heading: 'Hold a seat on the shuttle',
+  },
+  /** As with the RSVP: the invitation admits you and one guest. */
+  minSeats: 1,
+  maxSeats: 2,
+}
+
+/**
+ * Where the two service forms are delivered — makeup & hair, and the shuttle.
+ *
+ * All three are null, and while they are, those forms do not claim to have
+ * sent anything: they note the request on the guest's own device and say so
+ * plainly. Set any one of these and the same form starts delivering for real,
+ * and the wording that follows a submission changes with it.
+ *
+ * Kept apart from `rsvp` so service requests can go somewhere else — a
+ * coordinator's line rather than the family's — without moving the replies.
+ */
+export const enquiries = {
+  endpoint: null,
+  /** International format, digits only. */
+  whatsapp: null,
+  email: null,
+}
+
+/** The two service pages, linked from the invitation. */
+export const services = {
+  eyebrow: 'For our guests',
+  links: [
+    { to: '/makeup-hair', label: 'Makeup & Hair' },
+    { to: '/shuttle', label: 'Shuttle Service' },
+  ],
+}
+
+/* --------------------------------------------------------------------------
    Where to follow along. Each entry is `null` until a real account exists —
    the closing page omits the link rather than pointing at a dead handle.
    -------------------------------------------------------------------------- */

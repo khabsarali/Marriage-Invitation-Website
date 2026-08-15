@@ -64,6 +64,9 @@ rendered — a booking link that goes nowhere is worse than no button.
 | `venues.places[].venue` / `.address` / `.time` | the details on `/location` |
 | `venues.places[].mapQuery` | the **View on map** button, in place of "Map to follow" |
 | `contact.coordinator.name` / `.phone` / `.whatsapp` / `.email` | the card and the **Call** / **WhatsApp** / **Email** buttons on `/contact` |
+| `beauty.services[].offering` / `.availability` / `.location` / `.booking` | the two plates on `/makeup-hair` |
+| `shuttle.routes[].pickup` / `.departure` / `.venue` / `.returnRun` | the two plates on `/shuttle` |
+| `enquiries.endpoint` / `.whatsapp` / `.email` | real delivery for the two service forms — see below |
 
 Each hotel and venue is tied to a city by `cityId`, and the city's name and dates
 are read from `cities` — they are not written out a second time.
@@ -80,7 +83,16 @@ so they cannot drift apart.
 person it is addressed to and one guest. The picker offers exactly those two
 counts and the value is clamped to the same range before delivery, so a number
 put into the payload by hand cannot get past it either. Raise `maxGuests` and
-both forms widen together.
+both forms widen together. `shuttle.minSeats` / `.maxSeats` do the same for the
+seat picker, and are 1 and 2 for the same reason.
+
+**The two service forms do not pretend.** Makeup & hair and the shuttle deliver
+through [`src/lib/enquiry.js`](src/lib/enquiry.js), and `enquiries` is null on
+all three channels — so a submission is noted on the guest's own device and the
+form says exactly that, before the button is pressed and again after. It never
+claims to have sent anything. Set `enquiries.whatsapp`, `.email` or `.endpoint`
+and the same form starts delivering for real, the handoff buttons appear, and
+the wording changes with it.
 
 The film's pacing, grading and chapter titles live in
 [`src/config/scenes.config.js`](src/config/scenes.config.js), along with the
@@ -88,18 +100,24 @@ switch that turns it on.
 
 ---
 
-## The five pages
+## The seven pages
 
-The invitation is one long scroll at `/`. Behind it are four short pages that
+The invitation is one long scroll at `/`. Behind it are six short pages that
 answer the practical questions, so that none of them has to interrupt it.
 
 | | |
 |---|---|
-| `/` | the invitation — hero, cities, announcement, couple, evenings, countdown, response card, closing |
+| `/` | the invitation — hero, cities, announcement, couple, evenings, the two service links, countdown, response card, closing |
 | `/booking` | Your Stay — one plate per city |
 | `/location` | where, and the map buttons |
+| `/makeup-hair` | makeup and hair, and the request form |
+| `/shuttle` | the shuttle, per city, and the seat form |
 | `/contact` | the coordinator's card |
 | `/rsvp` | the full response card |
+
+Makeup & hair and the shuttle are **two separate pages**, not two halves of a
+"guest services" one, and the invitation links them as two separate buttons —
+combined, one of them always hides behind the other.
 
 Routing is [`src/lib/router.js`](src/lib/router.js) — about sixty lines over the
 History API, with no dependency, because deciding between five strings does not

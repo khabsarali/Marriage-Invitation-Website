@@ -1539,7 +1539,49 @@ select {
 }
 
 /* ==========================================================================
-   The information pages — /booking, /location, /contact, /rsvp
+   The two doors out of the invitation
+
+   A band of paper between the order of events and the countdown, carrying one
+   button per service page. Deliberately quiet: it is a way out of the
+   invitation, not a section of it, so it has a rule, a tracked label and two
+   outlined buttons, and no display type of its own.
+   ========================================================================== */
+
+.services {
+  padding-block: clamp(4rem, 9vh, 6.5rem);
+}
+.services__inner {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+.services__eyebrow {
+  margin-top: clamp(2rem, 4vw, 2.8rem);
+}
+.services__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(0.9rem, 2.4vw, 1.4rem);
+  margin-top: clamp(1.8rem, 4vw, 2.6rem);
+}
+.services__btn {
+  min-width: 15rem;
+}
+.services__arrow {
+  /* The arrow rides on the tracking, so it needs its own left margin back. */
+  margin-left: -0.1em;
+  font-size: 1.1em;
+  line-height: 1;
+  transition: transform 0.45s var(--ease);
+}
+.services__btn:hover .services__arrow {
+  transform: translateX(0.25rem);
+}
+
+/* ==========================================================================
+   The information pages — /booking, /location, /contact, /rsvp,
+   /makeup-hair, /shuttle
 
    Four short pages behind the invitation, and one ground for all of them: the
    night blue of the hero photograph rather than the invitation's warm onyx,
@@ -1918,6 +1960,83 @@ select {
   margin-top: clamp(2rem, 4vw, 2.8rem);
 }
 
+/* ---- the shuttle's one certainty --------------------------------------- */
+
+/* Set larger than the lede above it, because it is the one thing this page
+   knows for sure and everything under it is still "to be announced". */
+.statement {
+  max-width: 30rem;
+  margin: clamp(3rem, 7vh, 4.6rem) auto 0;
+  padding: clamp(1.6rem, 4vw, 2.4rem) clamp(1.4rem, 4vw, 2.6rem);
+  border-block: 1px solid var(--line-dark);
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 1.05rem + 1vw, 1.85rem);
+  line-height: 1.5;
+  text-align: center;
+  color: var(--paper);
+}
+
+/* ---- a form under its own heading, on a page that is mostly plates ------ */
+
+.form-block {
+  margin-top: clamp(4rem, 9vh, 6.5rem);
+  text-align: center;
+}
+.page-subtitle {
+  margin-top: clamp(1rem, 2.4vh, 1.6rem);
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.4rem);
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  color: var(--paper);
+}
+.form-block .card {
+  max-width: 42rem;
+  margin-inline: auto;
+  text-align: left;
+}
+/* Said before the button is pressed, not after it. */
+.form-note {
+  margin-top: 0.4rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  text-align: center;
+  color: rgba(249, 245, 238, 0.5);
+}
+
+/* The acknowledgement a service request gets. Not "sent" unless it was. */
+.note {
+  text-align: center;
+}
+.note__title {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(1.6rem, 1.3rem + 1.2vw, 2.2rem);
+  letter-spacing: 0.06em;
+  color: var(--paper);
+}
+.note .rule {
+  justify-self: center;
+}
+.note__body {
+  max-width: 30rem;
+  margin-inline: auto;
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 0.95rem + 0.3vw, 1.15rem);
+  line-height: 1.8;
+  color: rgba(249, 245, 238, 0.7);
+}
+.note .plate__actions {
+  justify-content: center;
+  padding-top: 0;
+}
+.note .link {
+  justify-self: center;
+}
+
 /* ---- the way back, and across ------------------------------------------ */
 
 .page-foot {
@@ -1976,10 +2095,11 @@ select {
   }
 }
 
-/* Was 820px, when the row was five labels. Seven need the extra eighty pixels,
-   and below this they are a row of unreadable stubs — so the sheet takes over
-   a little sooner. */
-@media (max-width: 900px) {
+/* Was 820px, when the row was five labels. Nine of them — two carrying two
+   words each — need about 1100, and below that they are a row of unreadable
+   stubs, so the sheet takes over instead. The sheet itself is unchanged: it was
+   always a full-screen list and reads nine as easily as five. */
+@media (max-width: 1100px) {
   .nav__links {
     display: none;
   }

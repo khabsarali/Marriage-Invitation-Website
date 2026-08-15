@@ -88,6 +88,8 @@ const FOOTER_LINKS = [
   { to: '/', label: 'The Invitation' },
   { to: '/booking', label: 'Your Stay' },
   { to: '/location', label: 'Location' },
+  { to: '/makeup-hair', label: 'Makeup & Hair' },
+  { to: '/shuttle', label: 'Shuttle' },
   { to: '/contact', label: 'Contact' },
   { to: '/rsvp', label: 'RSVP' },
 ]

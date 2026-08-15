@@ -4,12 +4,12 @@ import { useScrolledPast } from '../../lib/hooks.js'
 import { navigate, useRoute } from '../../lib/router.js'
 
 /**
- * Seven words and a monogram.
+ * Nine words and a monogram.
  *
  * Over the hero it is light and has no ground of its own; once the page has
- * scrolled past the hero it settles onto paper and turns to ink. On phones the
- * links collapse into a full-screen sheet, because seven tracked labels across
- * a 360px screen is a row of unreadable stubs.
+ * scrolled past the hero it settles onto paper and turns to ink. Below 1100px
+ * the links collapse into a full-screen sheet — nine tracked labels need that
+ * much room, and squeezed into less they are a row of unreadable stubs.
  *
  * Two kinds of link, one list. `hash` scrolls to a section of the invitation;
  * `to` is a page of its own. From a page, a hash link is not a scroll but a
@@ -23,6 +23,8 @@ const LINKS = [
   { hash: '#events', label: 'Events' },
   { to: '/booking', label: 'Booking' },
   { to: '/location', label: 'Location' },
+  { to: '/makeup-hair', label: 'Makeup & Hair' },
+  { to: '/shuttle', label: 'Shuttle Service' },
   { to: '/rsvp', label: 'RSVP' },
 ]
 

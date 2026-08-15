@@ -16,7 +16,15 @@
 import { useEffect, useState } from 'react'
 
 /** Every route the site answers to. The first is the invitation itself. */
-export const ROUTES = ['/', '/booking', '/location', '/contact', '/rsvp']
+export const ROUTES = [
+  '/',
+  '/booking',
+  '/location',
+  '/contact',
+  '/rsvp',
+  '/makeup-hair',
+  '/shuttle',
+]
 
 const EVENT = 'route:change'
 
