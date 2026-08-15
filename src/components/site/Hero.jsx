@@ -1,6 +1,6 @@
 import { Reveal, Rule } from './primitives.jsx'
 import { useParallax, useReveal } from '../../lib/hooks.js'
-import { coupleNames, couple, hero, invitation } from '../../config/wedding.config.js'
+import { coupleNames, couple, hero } from '../../config/wedding.config.js'
 
 /**
  * The hero, and the one place the names are set at full scale.
@@ -43,10 +43,6 @@ export default function Hero({ reducedMotion }) {
       <div className="hero__scrim" aria-hidden="true" />
 
       <div className="hero__copy">
-        <Reveal as="p" className="hero__blessing" delay={120} lang="ar" dir="rtl">
-          {invitation.blessing}
-        </Reveal>
-
         <Reveal as="p" className="hero__eyebrow" delay={260}>
           {hero.eyebrow}
         </Reveal>

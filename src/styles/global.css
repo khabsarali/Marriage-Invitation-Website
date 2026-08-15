@@ -52,7 +52,6 @@
   --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
   --font-sans: 'Jost', 'Segoe UI', system-ui, sans-serif;
   --font-script: 'Pinyon Script', 'Cormorant Garamond', cursive;
-  --font-arabic: 'Noto Naskh Arabic', 'Amiri', 'Segoe UI', 'Times New Roman', serif;
 
   --shell: min(1160px, 100% - 3rem);
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -654,7 +653,7 @@ html.lenis body {
 }
 /* Held much lighter than a wash would be: the backdrop is a photograph with a
    subject in it, so the scrim's job is only to keep the type off it. The bands
-   sit where the type sits — the blessing at the top, the cue over the lit
+   sit where the type sits — the eyebrow at the top, the cue over the lit
    terrace at the bottom — and the middle stays open so the two skylines and
    the water between them are legible behind the names. */
 .hero__scrim {
@@ -670,15 +669,9 @@ html.lenis body {
   width: var(--shell);
   padding-block: clamp(6rem, 14vh, 9rem);
 }
-.hero__blessing {
-  font-family: var(--font-arabic);
-  font-size: clamp(0.95rem, 0.9rem + 0.4vw, 1.25rem);
-  line-height: 2;
-  color: var(--gold-light);
-  opacity: 0.8;
-}
+/* No margin-top: the eyebrow opens the hero now, and the copy block is centred,
+   so a margin here would only push the whole composition off centre. */
 .hero__eyebrow {
-  margin-top: clamp(1.4rem, 4vh, 2.4rem);
   font-size: clamp(0.6rem, 0.56rem + 0.18vw, 0.74rem);
   font-weight: 400;
   letter-spacing: 0.44em;

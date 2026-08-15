@@ -136,16 +136,16 @@ export const announcement = {
 }
 
 /**
- * The blessing opens the hero; the verse closes the couple reveal.
+ * The verse closes the couple reveal.
  *
- * "Together with their families…" and "request the pleasure of your presence…"
- * used to live here as well. Both are gone from the page: the hosts announce the
- * wedding in their own words in the section above, and a second, more general
- * request underneath it said the same thing twice. They are in git history if
- * they are ever wanted back.
+ * The bismillah that opened the hero, "Together with their families…" and
+ * "request the pleasure of your presence…" all used to live here as well. All
+ * three are gone from the page: the hosts announce the wedding in their own
+ * words in the section above, and a second, more general request underneath it
+ * said the same thing twice. They are in git history if they are ever wanted
+ * back.
  */
 export const invitation = {
-  blessing: 'بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ',
   verse:
     '“And among His signs is that He created for you mates from among yourselves, that you may dwell in tranquillity with them, and He has put love and mercy between your hearts.”',
   verseSource: 'Surah Ar-Rum, 30:21',
