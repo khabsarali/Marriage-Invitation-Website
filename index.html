@@ -16,7 +16,7 @@
       property="og:description"
       content="A royal celebration of love. Dubai, 16–27 December 2026 · Karachi, 6–8 January 2027."
     />
-    <meta property="og:image" content="/stills/hero-wide.webp" />
+    <meta property="og:image" content="/backdrop/hero-wide.webp" />
     <meta name="twitter:card" content="summary_large_image" />
 
     <!-- Built by `npm run logo` from brand/monogram.jpg. -->
@@ -30,22 +30,22 @@
       rel="stylesheet"
     />
 
-    <!-- The monogram is the whole preloader, and the plate is the first thing
-         behind the invitation, so both are fetched alongside the bundle rather
-         than after it. Nothing else is preloaded: the film's frames are not
-         requested at all while ENABLE_3D_EXPERIENCE is false, and a static
+    <!-- The monogram is the whole preloader, and the backdrop is the first
+         thing behind the invitation, so both are fetched alongside the bundle
+         rather than after it. Nothing else is preloaded: the film's frames are
+         not requested at all while ENABLE_3D_EXPERIENCE is false, and a static
          preload here would ignore that switch. -->
     <link rel="preload" as="image" href="/brand/mark.webp" fetchpriority="high" />
     <link
       rel="preload"
       as="image"
-      href="/stills/hero-wide.webp"
+      href="/backdrop/hero-wide.webp"
       media="(orientation: landscape)"
     />
     <link
       rel="preload"
       as="image"
-      href="/stills/hero-tall.webp"
+      href="/backdrop/hero-tall.webp"
       media="(orientation: portrait)"
     />
   </head>

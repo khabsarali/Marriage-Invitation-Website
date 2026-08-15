@@ -9,6 +9,7 @@
     "build": "vite build",
     "preview": "vite preview --port 4173",
     "logo": "node scripts/build-logo.mjs",
+    "backdrop": "node scripts/build-backdrop.mjs",
     "stills": "node scripts/build-stills.mjs"
   },
   "dependencies": {

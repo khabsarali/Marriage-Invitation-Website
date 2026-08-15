@@ -53,19 +53,19 @@ export const couple = {
    themselves, and the two supporting lines beneath. This is the only place the
    names are set at full scale.
 
-   `still` is the ambient plate behind them — see scripts/build-stills.mjs for
-   where those images come from and why they are abstract rather than a
-   photograph of a couple.
+   `backdrop` is the photograph behind them — the two skylines across one
+   stretch of water, which is the picture `crossing` names. One crop per
+   orientation; see scripts/build-backdrop.mjs.
    -------------------------------------------------------------------------- */
 export const hero = {
   eyebrow: 'A Royal Celebration of Love',
   destiny: 'A Date With Destiny',
   crossing: 'When Dubai Meets Karachi',
   scrollCue: 'Scroll',
-  still: {
-    wide: '/stills/hero-wide.webp',
-    tall: '/stills/hero-tall.webp',
-    alt: 'Marigold garlands and candle light',
+  backdrop: {
+    wide: '/backdrop/hero-wide.webp',
+    tall: '/backdrop/hero-tall.webp',
+    alt: 'The Karachi and Dubai skylines at night, facing each other across the water',
   },
 }
 

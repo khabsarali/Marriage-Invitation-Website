@@ -652,13 +652,18 @@ html.lenis body {
   /* One slow push, then it holds. Not a loop. */
   animation: hero-push 34s var(--ease) both;
 }
+/* Held much lighter than a wash would be: the backdrop is a photograph with a
+   subject in it, so the scrim's job is only to keep the type off it. The bands
+   sit where the type sits — the blessing at the top, the cue over the lit
+   terrace at the bottom — and the middle stays open so the two skylines and
+   the water between them are legible behind the names. */
 .hero__scrim {
   position: absolute;
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(108% 82% at 50% 44%, rgba(11, 9, 7, 0.34) 0%, rgba(11, 9, 7, 0.74) 62%, rgba(11, 9, 7, 0.92) 100%),
-    linear-gradient(to bottom, rgba(11, 9, 7, 0.66), transparent 26%, transparent 58%, rgba(11, 9, 7, 0.88));
+    radial-gradient(122% 80% at 50% 46%, rgba(11, 9, 7, 0.12) 0%, rgba(11, 9, 7, 0.4) 60%, rgba(11, 9, 7, 0.66) 100%),
+    linear-gradient(to bottom, rgba(11, 9, 7, 0.6), rgba(11, 9, 7, 0.16) 24%, rgba(11, 9, 7, 0.2) 60%, rgba(11, 9, 7, 0.78));
 }
 .hero__copy {
   position: relative;
@@ -748,12 +753,14 @@ html.lenis body {
   color: rgba(249, 245, 238, 0.5);
 }
 
+/* Shallower than a wash could afford: this backdrop is a composition, and the
+   old 1.13 pushed the Burj and the mausoleum past the edges of the frame. */
 @keyframes hero-push {
   from {
-    transform: scale(1.03);
+    transform: scale(1.02);
   }
   to {
-    transform: scale(1.13);
+    transform: scale(1.07);
   }
 }
 @keyframes cue-in {

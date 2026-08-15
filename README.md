@@ -29,6 +29,7 @@ npm install
 npm run frames     # one-off: turns the source PNGs into optimised web assets
 npm run logo       # one-off: keys the monogram off its card and cuts favicons
 npm run stills     # one-off: builds the ambient plates the page paints with
+npm run backdrop   # one-off: cuts the hero's photograph to its two crops
 npm run dev
 ```
 
@@ -86,9 +87,28 @@ black, so the hand-over will want a look at.
 
 ---
 
+## The hero backdrop
+
+The one photograph on the page, and the only image that is not derived from the
+film: the two skylines facing each other across a single stretch of water —
+Quaid's mausoleum and the Empress Market clock tower on one side, the Burj and
+the Burj Al Arab on the other. It is the picture the hero's line *When Dubai
+Meets Karachi* is about, so it is used as given.
+
+[`scripts/build-backdrop.mjs`](scripts/build-backdrop.mjs), `npm run backdrop`,
+reads the two files in `public/Background` — one authored per orientation,
+because the composition is symmetrical about the water and cropping the
+landscape file to a phone would lose both skylines — and writes
+`public/backdrop/hero-wide.webp` (1600×900) and `hero-tall.webp` (1080×1921).
+No blur and no grade: unlike the plates below, this image is meant to be read,
+and the hero's own scrim is what holds the type off it. To change it, replace
+either source file and re-run the script.
+
+---
+
 ## The ambient plates
 
-The page paints with three large, quiet images —
+The page also paints with two large, quiet images —
 [`scripts/build-stills.mjs`](scripts/build-stills.mjs), `npm run stills`.
 
 There is no photography of Radia and Umar in this project, and every frame of
@@ -100,18 +120,19 @@ comes out is the light and the palette of the evening with nobody in it.
 
 | | |
 |---|---|
-| `hero-wide.webp`, `hero-tall.webp` | the mehndi set — marigold light behind the names, one per orientation |
 | `chandeliers.webp` | the barat hall, behind the countdown |
 | `roses.webp` | the walima room, behind the closing page |
 
-The two interiors keep a soft silhouette mid-frame, so those plates take a side
-of the room instead of the whole median; the crop is in the script and is
-commented there.
+Both interiors keep a soft silhouette mid-frame, so these plates take a side of
+the room instead of the whole median; the crop is in the script and is
+commented there. The script still writes `hero-wide.webp` and `hero-tall.webp`
+from the mehndi set, which is what the hero used before the photograph above
+replaced it; nothing paints with them now.
 
-The cities are **drawn**, not photographed — see
+Inside the page the cities are **drawn**, not photographed — see
 [`src/components/site/Skyline.jsx`](src/components/site/Skyline.jsx). Fine line
-work belongs to the same world as a printed invitation, where a stock skyline
-photograph does not.
+work belongs to the same world as a printed invitation, and the hero is the one
+place a photograph is allowed to carry both cities at once.
 
 ---
 

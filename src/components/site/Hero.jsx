@@ -11,10 +11,10 @@ import { coupleNames, couple, hero, invitation } from '../../config/wedding.conf
  * down, and printing them here as well is what made the old page feel like a
  * template.
  *
- * The plate behind is one image, not a collage: an abstract of marigold light
- * lifted from the film's mehndi set (see scripts/build-stills.mjs). It drifts
- * on scroll and pushes in very slowly; both stop under
- * `prefers-reduced-motion`.
+ * The plate behind is the supplied photograph of the two skylines across one
+ * stretch of water (see scripts/build-backdrop.mjs) — the picture the line
+ * "When Dubai Meets Karachi" is about. It drifts on scroll and pushes in very
+ * slowly; both stop under `prefers-reduced-motion`.
  */
 export default function Hero({ reducedMotion }) {
   const plateRef = useParallax({ from: -3.5, to: 3.5, disabled: reducedMotion })
@@ -24,15 +24,17 @@ export default function Hero({ reducedMotion }) {
     <section className="hero" id="invitation" aria-label="Radia and Umar">
       <div className="hero__plate" ref={plateRef}>
         <picture>
-          {/* A tall screen gets the portrait plate rather than the middle
-              quarter of the landscape one. */}
-          <source media="(orientation: portrait)" srcSet={hero.still.tall} />
+          {/* A tall screen gets the portrait crop rather than the middle
+              quarter of the landscape one — the composition is symmetrical
+              about the water, so cropping the wide file would cut both
+              skylines away. */}
+          <source media="(orientation: portrait)" srcSet={hero.backdrop.tall} />
           <img
-            src={hero.still.wide}
-            alt={hero.still.alt}
+            src={hero.backdrop.wide}
+            alt={hero.backdrop.alt}
             className="hero__image"
-            width="1760"
-            height="990"
+            width="1600"
+            height="900"
             fetchPriority="high"
             decoding="async"
           />
