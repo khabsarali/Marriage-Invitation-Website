@@ -100,9 +100,10 @@ reads the two files in `public/Background` — one authored per orientation,
 because the composition is symmetrical about the water and cropping the
 landscape file to a phone would lose both skylines — and writes
 `public/backdrop/hero-wide.webp` (1600×900) and `hero-tall.webp` (1080×1921).
-No blur and no grade: unlike the plates below, this image is meant to be read,
-and the hero's own scrim is what holds the type off it. To change it, replace
-either source file and re-run the script.
+Nothing is baked in — no blur, no grade. The exposure drop and the two scrim
+layers that hold the type off it all live in CSS on `.hero__image` and
+`.hero__scrim`, so they can be tuned without recutting the files. To change the
+picture itself, replace either source file and re-run the script.
 
 ---
 

@@ -13,8 +13,9 @@
  * and a landscape file cropped to a phone would lose both skylines. The sources
  * are the two files in `public/Background`, authored per orientation.
  *
- * No blur and no grade here — unlike the median plates, this image is meant to
- * be read. The hero's own scrim is what holds the type off it.
+ * No blur and no grade baked in here — unlike the median plates, this image is
+ * meant to be read. The exposure drop and the scrim that hold the type off it
+ * are CSS, so they stay tunable without recutting these files.
  */
 import sharp from 'sharp'
 import fs from 'node:fs/promises'
