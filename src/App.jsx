@@ -67,10 +67,10 @@ export default function App() {
   const [opened, setOpened] = useState(false)
   const onOpened = useCallback(() => setOpened(true), [])
 
-  // The portrait plate is what a phone will actually paint with, so that is the
+  // The portrait crop is what a phone will actually paint with, so that is the
   // one the preloader waits for — waiting on the landscape file would hold the
   // page for an image the visitor never sees.
-  const heroStill = isMobile ? heroConfig.still.tall : heroConfig.still.wide
+  const heroBackdrop = isMobile ? heroConfig.backdrop.tall : heroConfig.backdrop.wide
 
   /* -------------------------------------------------- scroll lock + smoothing */
 
@@ -114,7 +114,7 @@ export default function App() {
 
   return (
     <>
-      {!opened && <Preloader heroSrc={heroStill} onDone={onOpened} />}
+      {!opened && <Preloader heroSrc={heroBackdrop} onDone={onOpened} />}
 
       <Nav />
 
