@@ -1025,9 +1025,8 @@ html.lenis body {
   text-transform: uppercase;
   color: rgba(249, 245, 238, 0.55);
 }
-/* The pair. Two frames of one size, and the second dropped a little on wider
-   screens — set level they read as two passport photographs, and offset they
-   read as a spread.
+/* The pair. Two frames of one size, held on one line at every width — the
+   second used to drop on wider screens, and no longer does.
 
    48rem, and not more, is set by the photographs rather than by the layout.
    Both are rendered at 720x900 by `npm run portraits`, and neither source has
@@ -1052,11 +1051,6 @@ html.lenis body {
   height: auto;
   aspect-ratio: 4 / 5;
   object-fit: cover;
-}
-@media (min-width: 720px) {
-  .couple__frame:last-child {
-    margin-top: clamp(1.6rem, 4vw, 3rem);
-  }
 }
 .couple__verse {
   margin: clamp(3rem, 7vw, 5rem) auto 0;
