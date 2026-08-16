@@ -1027,12 +1027,18 @@ html.lenis body {
 }
 /* The pair. Two frames of one size, and the second dropped a little on wider
    screens — set level they read as two passport photographs, and offset they
-   read as a spread. */
+   read as a spread.
+
+   48rem, and not more, is set by the photographs rather than by the layout.
+   Both are rendered at 720x900 by `npm run portraits`, and neither source has
+   the detail to go bigger — hers is 672x840, his usable crop 570x712. At this
+   cap each frame lands near 360px, which is exactly 720 across a 2x screen.
+   Widen it further and the frames grow, but only by interpolation. */
 .couple__pair {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(0.9rem, 3vw, 1.8rem);
-  max-width: 38rem;
+  max-width: 48rem;
   margin: clamp(3rem, 7vw, 4.5rem) auto 0;
 }
 .couple__frame {
