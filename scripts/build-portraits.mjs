@@ -4,8 +4,9 @@
  *   npm run portraits
  *
  * The supplied files do not pair: hers is 4:5, outdoors, chest-up; his is 3:4,
- * studio, three-quarter length. Set side by side as they came, they read as two
- * photographs that happen to be next to each other rather than as a couple.
+ * studio, seated full-length, and he is small in a wide room. Set side by side
+ * as they came, they read as two photographs that happen to be next to each
+ * other rather than as a couple.
  *
  * So both are cut to one frame — 4:5, upper body, head in the same third —
  * which is what makes them a pair. `crop` is the region of the source to keep,
@@ -28,9 +29,11 @@ const HEIGHT = 900
 
 const PORTRAITS = [
   { name: 'radia', from: 'radia.webp', crop: null },
-  // Taken from the top of his head down to the waist, centred on him rather
-  // than on the frame — he stands right of centre in the source.
-  { name: 'umar', from: 'umar.jpeg', crop: { left: 200, top: 170, width: 760, height: 950 } },
+  // Taken from just above his head down to his lap — a little over a third of
+  // the source. It has to be that tight: his head is only 210px in a 1448px
+  // frame, and anything wider leaves him a smaller figure than she is. At this
+  // size his head lands the same height, and in the same third, as hers.
+  { name: 'umar', from: 'umar.jpeg', crop: { left: 260, top: 352, width: 570, height: 712 } },
 ]
 
 async function main() {
